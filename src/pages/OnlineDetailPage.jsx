@@ -1,5 +1,5 @@
-import { Fragment, useEffect, useState } from "react";
-import { ArrowLeft, ChevronRight, Heart, Share2, ShieldCheck, X } from "lucide-react";
+import { Fragment, useEffect, useRef, useState } from "react";
+import { ArrowLeft, Check, ChevronRight, FileInput, FileOutput, GitBranch, Heart, MousePointerClick, Share2, ShieldCheck, Sparkles, X } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppGlyph } from "../components/AppGlyph.jsx";
 import { AppIcon } from "../components/AppIcon.jsx";
@@ -18,6 +18,90 @@ const DEFAULT_AI_PERMISSIONS = [
   "读取已授权的字段内容",
   "将处理结果写回指定位置",
 ];
+
+function getAiUsageRecipe(item) {
+  const recipes = {
+    "AI 节点": {
+      placement: "把应用加入流程",
+      placementDetail: `在需要自动处理内容的位置添加“${item.name}”节点。`,
+      inputTitle: "连接工作项内容",
+      inputDetail: "选择当前工作项中允许该应用读取的字段或关联内容。",
+      outputTitle: "保存并验证流程",
+      finish: "保存流程后，先用一条测试工作项验证节点是否按预期执行。",
+    },
+    "AI 操作": {
+      placement: "添加到工作项操作",
+      placementDetail: `在需要人工触发的位置添加“${item.name}”操作。`,
+      inputTitle: "连接工作项内容",
+      inputDetail: "选择执行操作时允许该应用读取的字段或关联内容。",
+      outputTitle: "保存并试用操作",
+      finish: "保存后，在测试工作项中执行一次并检查生成结果。",
+    },
+    "AI 字段": {
+      placement: "添加 AI 字段",
+      placementDetail: `在目标工作项类型中添加“${item.name}”字段。`,
+      inputTitle: "选择内容来源",
+      inputDetail: "选择该字段生成时可以读取的工作项内容。",
+      outputTitle: "保存并查看结果",
+      finish: "保存字段配置后，使用一条完整数据验证生成结果。",
+    },
+  };
+  const formRecipe = recipes[item.aiForm] || recipes["AI 节点"];
+
+  return {
+    preparation: "准备一条包含真实业务内容的测试工作项，并确认当前空间已具备应用所需权限。",
+    output: item.summary,
+    steps: [
+      { title: formRecipe.placement, detail: formRecipe.placementDetail },
+      { title: formRecipe.inputTitle, detail: formRecipe.inputDetail },
+      { title: formRecipe.outputTitle, detail: formRecipe.finish },
+    ],
+    checks: [
+      ...(item.permissions || DEFAULT_AI_PERMISSIONS).slice(0, 2),
+      "使用测试工作项确认生成内容符合预期后，再应用到正式流程。",
+    ],
+  };
+}
+
+function AiUsageVisual({ item, compact = false }) {
+  const formClass = item.aiForm === "AI 操作" ? "action" : item.aiForm === "AI 字段" ? "field" : "node";
+  return (
+    <div className={`ai-usage-visual ai-usage-visual-${formClass}${compact ? " is-compact" : ""}`} aria-label={`${item.aiForm}配置位置示意`}>
+      <div className="ai-usage-placement-visual">
+        {formClass === "node" && (
+          <div className="ai-node-canvas">
+            <span className="ai-node-placeholder">上一节点</span>
+            <i />
+            <span className="ai-node-app"><AppGlyph item={item} size={20} /><b>{item.name}</b></span>
+            <i />
+            <span className="ai-node-placeholder">下一节点</span>
+          </div>
+        )}
+        {formClass === "action" && (
+          <div className="ai-action-canvas">
+            <span className="ai-action-work-item"><i /><i /><i /></span>
+            <button type="button" tabIndex={-1}><MousePointerClick size={14} />{item.name}</button>
+          </div>
+        )}
+        {formClass === "field" && (
+          <div className="ai-field-canvas">
+            <span><small>工作项内容</small><i /></span>
+            <span className="ai-field-app"><small>{item.name}</small><AppGlyph item={item} size={20} /></span>
+          </div>
+        )}
+      </div>
+      {!compact && (
+        <div className="ai-usage-dataflow-visual">
+          <span><FileInput size={16} /><small>工作项内容</small></span>
+          <i />
+          <span className="is-app"><AppGlyph item={item} size={22} /><small>{item.name}</small></span>
+          <i />
+          <span><FileOutput size={16} /><small>生成结果</small></span>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function HeroVisual({ item }) {
   if (item.coverImage) {
@@ -54,7 +138,7 @@ function DetailHero({ item, favorite, onFavorite, onPrimary, onShare }) {
         )}
         <div className="online-detail-actions">
           <button type="button" className="primary-button" onClick={onPrimary}>
-            {item.type === "ai" && "查看配置说明"}
+            {item.type === "ai" && "查看如何使用"}
             {item.type === "plugin" && "安装插件"}
             {item.type === "template" && "使用模板"}
             {item.type === "solution" && "查看完整方案"}
@@ -83,12 +167,52 @@ function EditorImage({ item, caption }) {
   );
 }
 
-function AiArticle({ item }) {
+function getAiStepIcons(item) {
+  const placementIcon = item.aiForm === "AI 操作"
+    ? MousePointerClick
+    : item.aiForm === "AI 字段"
+      ? FileOutput
+      : GitBranch;
+  return [placementIcon, FileInput, Check];
+}
+
+function AiArticle({ item, onOpenGuide }) {
+  const recipe = getAiUsageRecipe(item);
+  const stepIcons = getAiStepIcons(item);
   return (
     <>
       <h2>能力介绍</h2>
       <p>{item.fullDescription || item.summary}</p>
       <p>该应用会读取当前工作项中被授权的字段、文本或关联内容，按照预设目标完成处理，并将结果回写到指定位置。实际可读取的数据范围由空间权限和具体配置共同决定。</p>
+
+      <section className="ai-usage-recipe-preview" aria-labelledby="ai-usage-recipe-title">
+        <header>
+          <div>
+            <span><Sparkles size={14} />使用指南 · 3 步完成</span>
+            <h2 id="ai-usage-recipe-title">如何使用</h2>
+            <p>按照标准路径完成配置，建议先用测试工作项验证效果。</p>
+          </div>
+          <small>{item.aiForm}</small>
+        </header>
+        <div className="ai-usage-recipe-main">
+          <AiUsageVisual item={item} compact />
+          <ol className="ai-usage-recipe-steps">
+            {recipe.steps.map((step, index) => {
+              const StepIcon = stepIcons[index];
+              return (
+                <li key={step.title}>
+                  <i><StepIcon size={15} /></i>
+                  <span><small>步骤 {index + 1}</small><strong>{step.title}</strong><b>{step.detail}</b></span>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+        <footer className="ai-usage-recipe-result">
+          <div><span>完成后</span><p>{recipe.output}</p></div>
+          <button type="button" onClick={onOpenGuide}>查看完整步骤<ChevronRight size={14} /></button>
+        </footer>
+      </section>
 
       <h2>典型场景</h2>
       <ul>{(item.scenarios || []).map((scenario) => <li key={scenario}>{scenario}</li>)}</ul>
@@ -99,30 +223,70 @@ function AiArticle({ item }) {
 }
 
 function AiConfigurationDialog({ item, onClose }) {
-  const configuration = item.configuration;
+  const recipe = getAiUsageRecipe(item);
+  const stepIcons = getAiStepIcons(item);
+  const dialogRef = useRef(null);
+
+  useEffect(() => {
+    dialogRef.current?.focus();
+  }, []);
+
   return (
     <div className="ai-usage-dialog-backdrop" role="presentation" onMouseDown={onClose}>
       <section
+        ref={dialogRef}
         className="ai-usage-dialog"
         role="dialog"
+        tabIndex={-1}
         aria-modal="true"
         aria-labelledby="ai-configuration-dialog-title"
+        aria-describedby="ai-configuration-dialog-description"
         onMouseDown={(event) => event.stopPropagation()}
       >
         <header>
-          <div>
-            <h2 id="ai-configuration-dialog-title">{item.name}配置说明</h2>
-            <p>以下内容是该{item.aiForm}应用的专属配置，不是通用的节点或字段创建教程。</p>
+          <div className="ai-usage-dialog-title">
+            <AppGlyph item={item} size={40} />
+            <div>
+              <span className="ai-usage-dialog-source">{item.aiForm} · 使用指南</span>
+              <h2 id="ai-configuration-dialog-title">{item.name}</h2>
+              <p id="ai-configuration-dialog-description">3 步完成配置，建议先在测试工作项中验证。</p>
+            </div>
           </div>
           <button type="button" aria-label="关闭使用指引" onClick={onClose}><X size={18} /></button>
         </header>
-        <ol>
-          <li><strong>输入内容</strong><span>{configuration.input}</span></li>
-          <li><strong>处理要求</strong><span>{configuration.processing}</span></li>
-          <li><strong>输出结果</strong><span>{configuration.output}</span></li>
-          <li><strong>配置示例</strong><span>{configuration.example}</span></li>
-        </ol>
-        <p className="ai-usage-dialog-note">如何新增 AI 节点、AI 字段或 AI 操作属于平台通用帮助，不在单个应用详情中重复展示。</p>
+        <div className="ai-usage-dialog-body">
+          <aside className="ai-usage-dialog-scene">
+            <span>配置位置</span>
+            <AiUsageVisual item={item} compact />
+            <div className="ai-usage-dialog-outcome">
+              <Sparkles size={16} />
+              <div><small>完成后</small><p>{recipe.output}</p></div>
+            </div>
+          </aside>
+          <div className="ai-usage-dialog-guide">
+            <div className="ai-usage-dialog-preparation">
+              <FileInput size={16} />
+              <div><strong>开始前</strong><p>{recipe.preparation}</p></div>
+            </div>
+            <ol>
+              {recipe.steps.map((step, index) => {
+                const StepIcon = stepIcons[index];
+                return (
+                  <li key={step.title}>
+                    <i><StepIcon size={16} /></i>
+                    <div><small>步骤 {index + 1}</small><strong>{step.title}</strong><span>{step.detail}</span></div>
+                  </li>
+                );
+              })}
+            </ol>
+            <section className="ai-usage-dialog-checks">
+              <strong>发布前确认</strong>
+              <ul>
+                {recipe.checks.map((check) => <li key={check}><Check size={14} />{check}</li>)}
+              </ul>
+            </section>
+          </div>
+        </div>
       </section>
     </div>
   );
@@ -296,12 +460,16 @@ export function DetailPage() {
   const [favorite, setFavorite] = useState(false);
   const [activeDetailTab, setActiveDetailTab] = useState("overview");
   const [usageGuideOpen, setUsageGuideOpen] = useState(false);
+  const usageGuideReturnFocus = useRef(null);
   const item = supplies.find((candidate) => candidate.id === id)
     || supplies.find((candidate) => candidate.baseId === id);
   const back = () => navigate(sessionStorage.getItem("discover-return") || lastDiscoverLocation || "/discover");
 
   useEffect(() => {
-    if (!usageGuideOpen) return undefined;
+    if (!usageGuideOpen) {
+      usageGuideReturnFocus.current?.focus();
+      return undefined;
+    }
     const closeOnEscape = (event) => {
       if (event.key === "Escape") setUsageGuideOpen(false);
     };
@@ -318,8 +486,9 @@ export function DetailPage() {
     );
   }
 
-  const primaryAction = () => {
+  const primaryAction = (event) => {
     if (item.type === "ai") {
+      usageGuideReturnFocus.current = event?.currentTarget || document.activeElement;
       setUsageGuideOpen(true);
     }
     else notify(item.type === "plugin" ? "已模拟进入插件安装页" : item.type === "template" ? "已模拟打开模板使用流程" : "已模拟打开完整方案");
@@ -346,7 +515,7 @@ export function DetailPage() {
                 role="tabpanel"
                 aria-labelledby={`ai-${activeDetailTab}-tab`}
               >
-                {activeDetailTab === "overview" && <AiArticle item={item} />}
+                {activeDetailTab === "overview" && <AiArticle item={item} onOpenGuide={primaryAction} />}
                 {activeDetailTab === "permissions" && <AiPermissions item={item} />}
               </div>
             </>

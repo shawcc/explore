@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { BriefcaseBusiness, Building2, FolderOpen, Heart, LayoutTemplate, Plus, Search, Sparkles } from "lucide-react";
+import { BriefcaseBusiness, Building2, FolderOpen, Heart, LayoutTemplate, Plus, Search, Sparkles, X } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { SupplyCard } from "../components/SupplyCard.jsx";
 import { AppIcon } from "../components/AppIcon.jsx";
@@ -69,18 +69,117 @@ const pluginDeveloperScopes = [
   { id: "enterprise", label: "企业插件" },
 ];
 
-function CatalogSearch({ value, onChange, placeholder }) {
+function flattenSearchValue(value) {
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) return value.map(flattenSearchValue).join(" ");
+  if (value && typeof value === "object") return Object.values(value).map(flattenSearchValue).join(" ");
+  return "";
+}
+
+function getSearchText(item) {
+  const detailValues = [
+    item.fullDescription,
+    item.background,
+    item.scenarios,
+    item.configuration,
+    item.permissions,
+    item.includes,
+    item.coverage,
+  ];
+  return [
+    item.name,
+    item.summary,
+    item.provider,
+    item.developer,
+    item.aiForm,
+    item.tags,
+    item.positions,
+    ...detailValues,
+  ]
+    .map(flattenSearchValue)
+    .filter(Boolean)
+    .join(" ")
+    .toLocaleLowerCase("zh-CN");
+}
+
+function getDetailMatch(item, normalizedQuery) {
+  const directoryText = flattenSearchValue([
+    item.name,
+    item.summary,
+    item.provider,
+    item.developer,
+    item.aiForm,
+    item.tags,
+    item.positions,
+  ]).toLocaleLowerCase("zh-CN");
+  if (directoryText.includes(normalizedQuery)) return "";
+
+  const detailFields = [
+    item.fullDescription,
+    item.background,
+    item.scenarios,
+    item.configuration,
+    item.permissions,
+    item.includes,
+    item.coverage,
+  ];
+  return detailFields
+    .flatMap((value) => (
+      value && typeof value === "object" ? Object.values(value) : [value]
+    ))
+    .map(flattenSearchValue)
+    .find((value) => value.toLocaleLowerCase("zh-CN").includes(normalizedQuery)) || "";
+}
+
+function GlobalSearch({ value, onChange }) {
   return (
-    <label className="catalog-search">
-      <Search size={14} />
+    <label className="discover-global-search">
+      <Search size={16} />
       <input
         type="search"
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        placeholder={placeholder}
-        aria-label={placeholder}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") {
+            event.currentTarget.blur();
+            onChange("");
+          }
+        }}
+        placeholder="搜索 AI 应用、插件和模板"
+        aria-label="搜索发现中的全部内容"
       />
+      {value && (
+        <button type="button" onClick={() => onChange("")} aria-label="清空搜索">
+          <X size={14} />
+        </button>
+      )}
     </label>
+  );
+}
+
+function SearchResultGroup({ type, label, items, query }) {
+  if (items.length === 0) return null;
+
+  return (
+    <section className="discover-search-group" aria-label={`${label}搜索结果`}>
+      <header>
+        <div>
+          <AppIcon name={type} size={16} />
+          <h3>{label}</h3>
+        </div>
+        <span>{items.length}</span>
+      </header>
+      <div className={`supply-grid supply-grid-${type} discover-search-grid`}>
+        {items.map((item) => (
+          <SupplyCard
+            key={item.id}
+            item={item}
+            showAiForm={type === "ai"}
+            searchMatchDetail={getDetailMatch(item, query)}
+          />
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -142,7 +241,7 @@ export function DiscoverPage() {
     initialType === "solution" ? "solutions" : searchParams.get("templateView") || "official",
   );
   const [pluginCategory, setPluginCategory] = useState(searchParams.get("pluginCategory") || "all");
-  const [pluginQuery, setPluginQuery] = useState(searchParams.get("query") || "");
+  const [globalQuery, setGlobalQuery] = useState(searchParams.get("query") || "");
   const [pluginDeveloper, setPluginDeveloper] = useState(
     pluginDeveloperScopes.some((scope) => scope.id === searchParams.get("developer"))
       ? searchParams.get("developer")
@@ -180,25 +279,47 @@ export function DiscoverPage() {
     ];
   }, [items, pluginDeveloper]);
   const visiblePlugins = useMemo(() => {
-    const normalizedQuery = pluginQuery.trim().toLocaleLowerCase("zh-CN");
     const plugins = items.filter((item) => (
       item.type === "plugin"
       && (pluginCategory === "all" || item.tags.includes(pluginCategory))
       && (pluginDeveloper === "all" || item.pluginDeveloperScope === pluginDeveloper)
       && (pluginPrice === "all" || (pluginPrice === "paid" ? item.isPaid : !item.isPaid))
-      && (!normalizedQuery || `${item.name} ${item.summary} ${item.tags.join(" ")}`.toLocaleLowerCase("zh-CN").includes(normalizedQuery))
     ));
     return [...plugins].sort((left, right) => {
       if (pluginSort === "usage") return right.usageCount - left.usageCount;
       return right.score - left.score;
     });
-  }, [items, pluginCategory, pluginDeveloper, pluginPrice, pluginQuery, pluginSort]);
+  }, [items, pluginCategory, pluginDeveloper, pluginPrice, pluginSort]);
   const visibleTemplates = useMemo(() => {
     return {
       template: grouped.template,
       solution: grouped.solution,
     };
   }, [grouped]);
+  const normalizedGlobalQuery = globalQuery.trim().toLocaleLowerCase("zh-CN");
+  const globalSearchResults = useMemo(() => {
+    if (!normalizedGlobalQuery) return null;
+
+    const matches = items
+      .filter((item) => getSearchText(item).includes(normalizedGlobalQuery))
+      .sort((left, right) => {
+        const leftName = left.name.toLocaleLowerCase("zh-CN");
+        const rightName = right.name.toLocaleLowerCase("zh-CN");
+        const leftRank = leftName === normalizedGlobalQuery ? 0 : leftName.startsWith(normalizedGlobalQuery) ? 1 : leftName.includes(normalizedGlobalQuery) ? 2 : 3;
+        const rightRank = rightName === normalizedGlobalQuery ? 0 : rightName.startsWith(normalizedGlobalQuery) ? 1 : rightName.includes(normalizedGlobalQuery) ? 2 : 3;
+        return leftRank - rightRank || (right.score || 0) - (left.score || 0);
+      });
+
+    return {
+      ai: matches.filter((item) => item.type === "ai"),
+      plugin: matches.filter((item) => item.type === "plugin"),
+      template: matches.filter((item) => item.type === "template" || item.type === "solution"),
+    };
+  }, [items, normalizedGlobalQuery]);
+  const isSearching = Boolean(globalSearchResults);
+  const globalResultCount = isSearching
+    ? Object.values(globalSearchResults).reduce((total, resultItems) => total + resultItems.length, 0)
+    : 0;
 
   useEffect(() => {
     const saved = Number(sessionStorage.getItem("discover-scroll") || 0);
@@ -218,9 +339,11 @@ export function DiscoverPage() {
   const switchTab = (type) => {
     tabScroll.current[activeTab] = window.scrollY;
     setActiveTab(type);
+    setGlobalQuery("");
     setSearchParams((current) => {
       current.set("type", type);
       current.delete("goal");
+      current.delete("query");
       return current;
     });
     requestAnimationFrame(() => window.scrollTo({ top: tabScroll.current[type] || 0, behavior: "instant" }));
@@ -281,6 +404,15 @@ export function DiscoverPage() {
     });
   };
 
+  const updateGlobalQuery = (value) => {
+    setGlobalQuery(value);
+    setSearchParams((current) => {
+      if (value.trim()) current.set("query", value);
+      else current.delete("query");
+      return current;
+    }, { replace: true });
+  };
+
   return (
     <main className="page discover-page-new">
       <div className="page-heading discover-heading">
@@ -290,22 +422,23 @@ export function DiscoverPage() {
         </div>
       </div>
 
-      <nav className="discover-category-nav" aria-label="内容类型">
+      <nav className={`discover-category-nav${isSearching ? " is-searching" : ""}`} aria-label="内容类型">
         {discoverTabs.map((tab) => (
           <button
             key={tab.id}
             type="button"
-            className={`discover-category-${tab.id}${activeTab === tab.id ? " is-active" : ""}`}
+            className={`discover-category-${tab.id}${!isSearching && activeTab === tab.id ? " is-active" : ""}`}
             onClick={() => switchTab(tab.id)}
           >
             <AppIcon name={tab.icon} size={14} />
             {tab.label}
           </button>
         ))}
+        <GlobalSearch value={globalQuery} onChange={updateGlobalQuery} />
       </nav>
 
-      <div className={`discover-content-layout${activeTab === "ai" ? " has-ai-nav" : ""}${activeTab === "plugin" ? " has-plugin-nav" : ""}${templateWorkspaceActive ? " has-template-nav" : ""}`}>
-      {templateWorkspaceActive && (
+      <div className={`discover-content-layout${!isSearching && activeTab === "ai" ? " has-ai-nav" : ""}${!isSearching && activeTab === "plugin" ? " has-plugin-nav" : ""}${!isSearching && templateWorkspaceActive ? " has-template-nav" : ""}${isSearching ? " is-searching" : ""}`}>
+      {!isSearching && templateWorkspaceActive && (
         <nav className="template-view-nav" aria-label="模板功能">
           {templateViewGroups.map((group, index) => (
             <div className="market-nav-group" key={group.label || "assets"}>
@@ -326,7 +459,7 @@ export function DiscoverPage() {
           ))}
         </nav>
       )}
-      {activeTab === "plugin" && (
+      {!isSearching && activeTab === "plugin" && (
         <nav className="plugin-category-nav" aria-label="插件分类">
           <div className="market-nav-group">
             <strong>开发者</strong>
@@ -357,7 +490,7 @@ export function DiscoverPage() {
           </div>
         </nav>
       )}
-      {activeTab === "ai" && (
+      {!isSearching && activeTab === "ai" && (
         <nav className="ai-category-nav" aria-label="AI 应用形态">
           {aiForms.map((form) => (
             <button
@@ -374,9 +507,8 @@ export function DiscoverPage() {
       )}
 
       <div className="discover-content-main">
-      {activeTab === "plugin" && (
+      {!isSearching && activeTab === "plugin" && (
         <div className="catalog-toolbar plugin-toolbar" aria-label="插件筛选与排序">
-          <CatalogSearch value={pluginQuery} onChange={setPluginQuery} placeholder="搜索插件" />
           <div className="catalog-toolbar-filters">
             <label>
               <span>价格</span>
@@ -402,13 +534,36 @@ export function DiscoverPage() {
           </div>
         </div>
       )}
-      {isLegacy && (
+      {!isSearching && isLegacy && (
         <div className="legacy-notice">
           原“模板中心”已升级为“发现”，你访问的模板内容仍可在这里查看。
         </div>
       )}
 
-      {templateWorkspaceActive && ["mine", "enterprise", "favorites"].includes(templateView) ? (
+      {isSearching ? (
+        <section className="discover-search-results" aria-live="polite">
+          <header className="discover-search-summary">
+            <div>
+              <h2>搜索结果</h2>
+              <span>“{globalQuery.trim()}”</span>
+            </div>
+            <strong>{globalResultCount} 个结果</strong>
+          </header>
+          {globalResultCount > 0 ? (
+            <div className="discover-search-groups">
+              <SearchResultGroup type="ai" label="AI 应用" items={globalSearchResults.ai} query={normalizedGlobalQuery} />
+              <SearchResultGroup type="plugin" label="插件" items={globalSearchResults.plugin} query={normalizedGlobalQuery} />
+              <SearchResultGroup type="template" label="模板与解决方案" items={globalSearchResults.template} query={normalizedGlobalQuery} />
+            </div>
+          ) : (
+            <div className="catalog-empty discover-search-empty">
+              <Search size={22} />
+              <strong>没有找到相关内容</strong>
+              <span>可以尝试更短或不同的关键词。</span>
+            </div>
+          )}
+        </section>
+      ) : templateWorkspaceActive && ["mine", "enterprise", "favorites"].includes(templateView) ? (
         <TemplateWorkspace
           view={templateView}
           templates={items.filter((item) => item.type === "template")}

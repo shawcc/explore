@@ -77,7 +77,7 @@ function Cover({ item }) {
   return <SolutionPreview item={item} />;
 }
 
-export function SupplyCard({ item }) {
+export function SupplyCard({ item, showAiForm = false, searchMatchDetail = "" }) {
   const location = useLocation();
   const { setLastDiscoverLocation } = useDemo();
   const meta = TYPE_META[item.type];
@@ -98,7 +98,18 @@ export function SupplyCard({ item }) {
       <div className="card-content">
         {!isApp && <h3>{item.name}</h3>}
         <p className="card-summary">{item.summary}</p>
+        {searchMatchDetail && (
+          <p className="search-match-detail">
+            <span>匹配详情</span>
+            {searchMatchDetail}
+          </p>
+        )}
 
+        {item.type === "ai" && showAiForm && (
+          <div className="card-specific app-card-meta search-ai-form">
+            <div className="tag-list"><span>{item.aiForm}</span></div>
+          </div>
+        )}
         {item.type === "plugin" && (
           <div className="card-specific app-card-meta">
             <div className="tag-list">{item.tags.slice(0, 2).map((tag) => <span key={tag}>{tag}</span>)}</div>
