@@ -19,9 +19,23 @@ const DEFAULT_AI_PERMISSIONS = [
   "将处理结果写回指定位置",
 ];
 
+function getRequiredConfigFields(item) {
+  if (item.configuration?.requiredFields?.length) return item.configuration.requiredFields;
+
+  return [
+    { label: "输入内容", value: item.configuration?.input || `选择${item.name}需要处理的工作项内容`, control: "select" },
+    { label: "处理要求", value: item.configuration?.processing || `填写${item.name}的处理目标和输出要求`, control: "textarea" },
+  ];
+}
+
+function getRequiredConfigSummary(item) {
+  return getRequiredConfigFields(item).map(({ label }) => `“${label}”`).join("、");
+}
+
 function getAiUsageRecipe(item) {
   const nodeInput = (item.configuration?.input || `填写${item.name}处理所需的工作项内容`).replace(/[。；;]+$/, "");
   const nodeOutput = (item.configuration?.output || item.summary).replace(/[。；;]+$/, "");
+  const requiredConfigSummary = getRequiredConfigSummary(item);
   const recipes = {
     "AI 节点": {
       preparation: "准备一条包含真实业务内容的测试工作项，并确认当前账号可以查看实例、进入节点和运行 AI 应用。",
@@ -39,8 +53,8 @@ function getAiUsageRecipe(item) {
           detail: `在节点实操区选择“AI 应用”，再从应用列表中选择“${item.name}”。`,
         },
         {
-          title: "填写输入与指令",
-          detail: `${nodeInput}；再根据页面提示补充任务指令，明确处理目标和输出要求。`,
+          title: "填写必填配置",
+          detail: `依次完成${requiredConfigSummary}；${nodeInput}，并按页面要求确认每一项输入。`,
         },
         {
           title: "运行 AI 应用",
@@ -64,8 +78,9 @@ function getAiUsageRecipe(item) {
       preparation: "准备一条包含真实业务内容的测试工作项，并确认当前空间已具备应用所需权限。",
       steps: [
         { title: "添加 AI 字段", detail: `在目标工作项类型中添加“${item.name}”字段。` },
-        { title: "选择内容来源", detail: "选择该字段生成时可以读取的工作项内容。" },
-        { title: "保存并查看结果", detail: "保存字段配置后，使用一条完整数据验证生成结果。" },
+        { title: `选择“${item.name}”`, detail: `在 AI 字段应用列表中选择“${item.name}”，进入该应用的专属配置。` },
+        { title: "填写必填配置", detail: `依次完成${requiredConfigSummary}，所有带星号的项目都需要填写。` },
+        { title: "保存并查看结果", detail: "保存字段配置后，使用一条完整数据生成结果并核对内容。" },
       ],
     },
   };
@@ -324,8 +339,8 @@ function AiNodeGuideScene({ item, stepIndex, recipe }) {
     { name: "相似工作项查询" },
     { name: "PRD 完整性审核" },
   ].filter((candidate, index, candidates) => candidates.findIndex((entry) => entry.name === candidate.name) === index);
-  const inputText = (item.configuration?.input || `填写${item.name}处理所需的工作项内容`).replace(/[。；;]+$/, "");
   const outputText = item.configuration?.output || item.summary;
+  const requiredFields = getRequiredConfigFields(item);
 
   if (stepIndex === 0) {
     return (
@@ -389,15 +404,10 @@ function AiNodeGuideScene({ item, stepIndex, recipe }) {
           <button type="button" tabIndex={-1}><Sparkles size={14} />更换 AI 节点</button>
         </div>
         <div className="ai-real-config-fields">
-          {[
-            ["请选择需求名称所在字段", "需求名称"],
-            ["选择需求简要描述所在字段", "需求描述"],
-            ["选择生成结果的存储字段", "AI 处理结果"],
-            ["模板或参考内容", inputText],
-          ].map(([label, value], index) => (
+          {requiredFields.map(({ label, value, control }) => (
             <label key={label}>
-              <span>{label}{index < 3 && <b>*</b>}{index < 3 && <Info size={12} />}</span>
-              <div>{value}<ChevronDown size={14} /></div>
+              <span>{label}<b>*</b><Info size={12} /></span>
+              <div className={control === "textarea" ? "is-textarea" : ""}>{value}{control === "select" && <ChevronDown size={14} />}</div>
             </label>
           ))}
           <label className="is-inline">
@@ -430,6 +440,7 @@ function AiNodeGuideScene({ item, stepIndex, recipe }) {
 
 function AiNodeConfigScene({ item, stepIndex }) {
   const apps = [item.name, "AI 智能洞察", "AI 智能填单", "AI PRD 质检", "AI 生成云文档"];
+  const requiredFields = getRequiredConfigFields(item);
   const showConfiguration = stepIndex >= 2;
   const showAppList = stepIndex === 3;
   const showRules = stepIndex === 4;
@@ -483,12 +494,15 @@ function AiNodeConfigScene({ item, stepIndex }) {
               )}
               {showRules && (
                 <div className="ai-admin-rule-panel">
-                  <small>按自上向下顺序生效</small>
+                  <small>必填配置 · {requiredFields.length} 项</small>
                   <section>
-                    <header><strong>配置组 1</strong><MoreHorizontal size={14} /></header>
-                    <label><span>生效条件</span><button type="button" tabIndex={-1}>+ 添加生效条件</button></label>
-                    <label><span>执行任务的人员<Info size={11} /></span><div>指定人员<ChevronDown size={12} /></div></label>
-                    <label><span>指令内容 <b>*</b></span><div className="ai-admin-instruction">自定义任务指令，支持 @ 引用字段</div></label>
+                    <header><strong>{item.name}配置</strong><MoreHorizontal size={14} /></header>
+                    {requiredFields.map(({ label, value, control }) => (
+                      <label key={label}>
+                        <span>{label} <b>*</b><Info size={11} /></span>
+                        <div className={control === "textarea" ? "ai-admin-instruction" : ""}>{value}{control === "select" && <ChevronDown size={12} />}</div>
+                      </label>
+                    ))}
                   </section>
                 </div>
               )}
@@ -505,12 +519,13 @@ function AiNodeConfigScene({ item, stepIndex }) {
 function AiNodeWalkthrough({ item, recipe, stepIcons }) {
   const [guideMode, setGuideMode] = useState("instance");
   const [activeStep, setActiveStep] = useState(0);
+  const requiredConfigSummary = getRequiredConfigSummary(item);
   const adminSteps = [
     { title: "进入流程管理", detail: "以空间管理员身份进入目标工作项类型，在顶部选择“流程管理”并打开流程图。" },
     { title: "选择目标节点", detail: "在流程图中选择需要接入 AI 能力的节点，右侧将显示该节点的配置面板。" },
     { title: "打开 AI 配置", detail: "在节点配置面板中切换到“AI 配置”，开始设置该节点使用的 AI 能力。" },
     { title: "选择 AI 节点应用", detail: `展开应用选择器，从列表中选择“${item.name}”；也可以进入 AI 节点市场查看更多应用。` },
-    { title: "配置规则并保存", detail: "设置生效条件、执行人员和任务指令，确认无误后保存流程配置。" },
+    { title: "填写必填项并保存", detail: `完成${requiredConfigSummary}，确认所有必填项有效后保存流程配置。` },
   ];
   const adminIcons = [GitBranch, MousePointerClick, Sparkles, Bot, Check];
   const isAdmin = guideMode === "admin";
@@ -586,6 +601,7 @@ function AiNodeWalkthrough({ item, recipe, stepIcons }) {
 
 function AiFieldAdminScene({ item, stepIndex }) {
   const apps = [item.name, "自定义指令", "关键内容提取", "文本优化"];
+  const requiredFields = getRequiredConfigFields(item);
   const showAppList = stepIndex === 2;
   const showConfig = stepIndex === 3;
   const fields = [
@@ -632,9 +648,13 @@ function AiFieldAdminScene({ item, stepIndex }) {
             {showConfig && (
               <div className="ai-field-admin-ai-config">
                 <label><i /><span>启用 AI 字段自动计算</span></label>
-                <h4><b>AI</b>配置</h4>
-                <div><span>提取对象 <b>*</b></span><em>选择需要处理的文本字段<ChevronDown size={12} /></em></div>
-                <div><span>处理要求 <b>*</b></span><em>填写需要提取或生成的内容</em></div>
+                <h4><b>AI</b>{item.name}配置</h4>
+                {requiredFields.map(({ label, value, control }) => (
+                  <div key={label}>
+                    <span>{label} <b>*</b></span>
+                    <em className={control === "textarea" ? "is-textarea" : ""}>{value}{control === "select" && <ChevronDown size={12} />}</em>
+                  </div>
+                ))}
                 <button type="button" tabIndex={-1}>保存字段配置</button>
               </div>
             )}
@@ -654,6 +674,7 @@ function AiFieldInstanceScene({ item, stepIndex }) {
     ["智联-在线文档问题", "2026-08-18", "P1", "需求建议", "PM评估"],
   ];
   const apps = [item.name, "停滞风险预警", "价值评估", "延期风险判断", "文本优化", "分类打标"];
+  const requiredFields = getRequiredConfigFields(item);
   const showMenu = stepIndex === 2;
   const showEditor = stepIndex === 3;
 
@@ -680,10 +701,13 @@ function AiFieldInstanceScene({ item, stepIndex }) {
           <label><span>表格列名称 <Info size={11} /></span><div>{item.name}</div></label>
           <button type="button" tabIndex={-1}>更多设置<ChevronRight size={12} /></button>
           <section>
-            <h4><b>AI</b>配置</h4>
-            <label><span>待处理的文本 <b>*</b></span><div>请选择需要处理的文本字段<ChevronDown size={12} /></div></label>
-            <label><span>处理说明 <b>*</b></span><div className="is-textarea">请输入希望 AI 执行的处理说明</div></label>
-            <label><span>参考示例</span><div className="is-textarea">可填写一条理想结果作为参考</div></label>
+            <h4><b>AI</b>{item.name}配置</h4>
+            {requiredFields.map(({ label, value, control }) => (
+              <label key={label}>
+                <span>{label} <b>*</b></span>
+                <div className={control === "textarea" ? "is-textarea" : ""}>{value}{control === "select" && <ChevronDown size={12} />}</div>
+              </label>
+            ))}
           </section>
           <button type="button" className="is-primary" tabIndex={-1}>生成结果</button>
         </aside>
@@ -695,17 +719,18 @@ function AiFieldInstanceScene({ item, stepIndex }) {
 function AiFieldWalkthrough({ item }) {
   const [guideMode, setGuideMode] = useState("admin");
   const [activeStep, setActiveStep] = useState(0);
+  const requiredConfigSummary = getRequiredConfigSummary(item);
   const adminSteps = [
     { title: "进入字段管理", detail: "以空间管理员身份进入目标工作项类型，在顶部选择“字段管理”。" },
     { title: "选择或新建字段", detail: "选择需要接入 AI 的字段，或点击“新建 AI 字段”创建新字段。" },
     { title: "关联 AI 字段应用", detail: `展开“关联的 AI 字段应用”，从列表中选择“${item.name}”。` },
-    { title: "配置应用并保存", detail: "设置输入字段、处理要求、参考示例和自动计算选项，然后保存字段配置。" },
+    { title: "填写必填项并保存", detail: `完成${requiredConfigSummary}，确认带星号的项目均已填写后保存字段配置。` },
   ];
   const instanceSteps = [
     { title: "打开表格视图", detail: "进入工作项实例的表格视图，定位需要新增 AI 字段的列位置。" },
     { title: "添加 AI 字段列", detail: "点击表头中的新增列入口，打开字段类型与 AI 字段应用菜单。" },
     { title: "选择 AI 字段应用", detail: `从列表中选择“${item.name}”，创建对应的 AI 字段列。` },
-    { title: "配置并生成结果", detail: "填写表格列名称，选择输入字段并补充处理说明，生成后检查字段结果。" },
+    { title: "配置并生成结果", detail: `填写表格列名称，并完成${requiredConfigSummary}；生成后核对字段结果。` },
   ];
   const icons = [FileOutput, MousePointerClick, Bot, Check];
   const isAdmin = guideMode === "admin";

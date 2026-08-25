@@ -9138,6 +9138,13 @@ ol.ai-usage-recipe-steps > li b {
   font-style: normal;
 }
 
+.ai-field-admin-ai-config > div > em.is-textarea {
+  min-height: 42px;
+  align-items: flex-start;
+  padding-block: 7px;
+  line-height: 1.45;
+}
+
 .ai-field-admin-ai-config > button {
   height: 28px;
   border: 0;
@@ -9376,6 +9383,10 @@ ol.ai-usage-recipe-steps > li b {
   color: #373c43;
   font-size: 8px;
   font-weight: 550;
+}
+
+.ai-field-instance-editor label > span b {
+  color: #d83931;
 }
 
 .ai-field-instance-editor > label > div,
@@ -10106,6 +10117,15 @@ button.ai-real-table-row {
   font-size: 9px;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.ai-real-config-fields label > div.is-textarea {
+  height: auto;
+  min-height: 42px;
+  align-items: flex-start;
+  padding-block: 7px;
+  line-height: 1.45;
+  white-space: normal;
 }
 
 .ai-real-config-fields label > div svg {

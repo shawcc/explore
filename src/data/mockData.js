@@ -981,71 +981,214 @@ const aiConfiguration = {
     input: "选择需要提供给提示词的工作项字段、描述、评论或关联文档。",
     processing: "编写任务目标、输出格式和限制条件，并通过变量引用输入内容。",
     output: "生成符合自定义提示词要求的文本或结构化结果。",
+    requiredByForm: {
+      "AI 字段": [
+        { label: "待处理的文本", value: "需求描述", control: "select" },
+        { label: "处理说明", value: "总结需求目标、范围和验收标准", control: "textarea" },
+      ],
+      "AI 节点": [
+        { label: "输入内容", value: "需求名称、需求描述、验收标准", control: "select" },
+        { label: "任务指令", value: "提炼关键信息并按项目模板输出", control: "textarea" },
+        { label: "结果存储字段", value: "AI 处理结果", control: "select" },
+      ],
+    },
   },
   "ai-smart-fill": {
     input: "选择信息来源文档或文本，以及需要补全的目标字段。",
     processing: "为每个目标字段配置提取规则、格式要求和缺失值处理方式。",
     output: "提取并校验客户、需求或合同信息后写入对应字段。",
+    requiredByForm: {
+      "AI 字段": [
+        { label: "信息来源", value: "需求文档", control: "select" },
+        { label: "提取目标", value: "客户名称、联系人、预算范围", control: "textarea" },
+        { label: "缺失值处理", value: "留空并标记待补充", control: "select" },
+      ],
+      "AI 节点": [
+        { label: "信息来源", value: "需求文档或合同附件", control: "select" },
+        { label: "目标字段", value: "客户名称、预算、交付日期", control: "select" },
+        { label: "字段提取规则", value: "按字段格式提取，无法确认时不写入", control: "textarea" },
+        { label: "结果写入方式", value: "仅填充空字段", control: "select" },
+      ],
+    },
   },
   "ai-test-cases": {
     input: "选择需求描述、验收标准、关联原型和已有测试规范。",
     processing: "配置用例模板、覆盖维度、优先级规则以及需要重点检查的边界条件。",
     output: "生成包含前置条件、操作步骤、预期结果和优先级的测试用例。",
+    requiredByForm: {
+      "AI 节点": [
+        { label: "需求内容", value: "需求描述、验收标准、关联原型", control: "select" },
+        { label: "用例模板", value: "标准功能测试用例模板", control: "select" },
+        { label: "覆盖范围", value: "主流程、异常流程、权限与边界条件", control: "textarea" },
+        { label: "结果存储位置", value: "测试用例子任务", control: "select" },
+      ],
+    },
   },
   "ai-custom-instruction": {
     input: "选择需要参与生成的工作项字段和上下文内容。",
     processing: "编写自定义指令，明确角色、任务目标、输出格式和约束条件。",
     output: "按团队要求生成检查结论、内容初稿或结构化结果。",
+    requiredByForm: {
+      "AI 字段": [
+        { label: "引用字段", value: "需求名称、需求描述、优先级", control: "select" },
+        { label: "自定义指令", value: "以产品评审视角检查信息完整性并列出缺口", control: "textarea" },
+        { label: "输出格式", value: "结论 + 问题清单 + 修改建议", control: "select" },
+      ],
+    },
   },
   "ai-summary": {
     input: "选择需要总结的描述、评论、文档或其他长文本字段。",
     processing: "配置总结长度、关注主题、结构格式以及需要保留的关键信息。",
     output: "生成重点明确、可直接阅读或继续流转的结构化摘要。",
+    requiredByForm: {
+      "AI 字段": [
+        { label: "待总结内容", value: "需求描述与评论", control: "select" },
+        { label: "总结要求", value: "保留目标、结论、风险和待办", control: "textarea" },
+        { label: "摘要长度", value: "300 字以内", control: "select" },
+      ],
+      "AI 节点": [
+        { label: "内容来源", value: "需求文档、评论和关联文档", control: "select" },
+        { label: "关注主题", value: "关键结论、风险、负责人和截止时间", control: "textarea" },
+        { label: "输出结构", value: "摘要 + 风险 + 待办", control: "select" },
+        { label: "结果存储字段", value: "项目摘要", control: "select" },
+      ],
+    },
   },
   "ai-doc-gen": {
     input: "选择文档主题、背景资料、需求字段和关联内容。",
     processing: "选择文档模板并配置章节结构、写作要求和缺失信息标记方式。",
     output: "生成 PRD、产品手册或其他业务文档初稿。",
+    requiredByForm: {
+      "AI 节点": [
+        { label: "文档主题", value: "当前工作项需求名称", control: "select" },
+        { label: "背景资料", value: "需求描述、调研结论、关联附件", control: "select" },
+        { label: "文档模板", value: "标准产品需求文档", control: "select" },
+        { label: "生成位置", value: "项目云文档目录", control: "select" },
+      ],
+    },
   },
   "ai-insight": {
     input: "选择需要分析的工作项集合、指标字段和时间范围。",
     processing: "配置分析维度、异常判断标准和需要回答的业务问题。",
     output: "生成趋势、异常、风险和建议组成的结构化洞察。",
+    requiredByForm: {
+      "AI 节点": [
+        { label: "分析范围", value: "当前项目全部未完成需求", control: "select" },
+        { label: "指标字段", value: "状态、优先级、负责人、排期", control: "select" },
+        { label: "统计周期", value: "最近 30 天", control: "select" },
+        { label: "分析目标", value: "识别延期趋势、资源瓶颈和高风险需求", control: "textarea" },
+      ],
+    },
   },
   "ai-smart-score": {
     input: "选择待评分内容和评分所需的工作项字段。",
     processing: "配置评分维度、各维度权重、判定标准和分数范围。",
     output: "输出总分、分项得分以及对应的评分依据。",
+    requiredByForm: {
+      "AI 字段": [
+        { label: "待评分内容", value: "需求描述与验收标准", control: "select" },
+        { label: "评分维度", value: "价值、完整性、可行性、风险", control: "textarea" },
+        { label: "分数范围", value: "0-100 分", control: "select" },
+      ],
+      "AI 节点": [
+        { label: "评分对象", value: "需求描述、目标和验收标准", control: "select" },
+        { label: "评分维度及权重", value: "价值 40%、完整性 30%、可行性 30%", control: "textarea" },
+        { label: "评分标准", value: "按每个维度的明确判定条件给分", control: "textarea" },
+        { label: "结果存储字段", value: "需求质量评分", control: "select" },
+      ],
+    },
   },
   "ai-classify": {
     input: "选择需要分类的文本内容和可选标签范围。",
     processing: "配置分类定义、标签边界、多标签规则和低置信度处理方式。",
     output: "输出匹配的分类标签及必要的判断说明。",
+    requiredByForm: {
+      "AI 字段": [
+        { label: "待分类内容", value: "反馈标题与反馈描述", control: "select" },
+        { label: "可选标签", value: "缺陷、需求建议、使用问题、咨询", control: "select" },
+        { label: "分类规则", value: "优先选择最具体标签，低置信度标记待确认", control: "textarea" },
+      ],
+      "AI 节点": [
+        { label: "分类内容", value: "工作项标题、描述和评论", control: "select" },
+        { label: "标签范围", value: "缺陷、需求建议、使用问题、咨询", control: "select" },
+        { label: "多标签规则", value: "最多输出 2 个标签并给出主标签", control: "textarea" },
+        { label: "结果存储字段", value: "反馈类型", control: "select" },
+      ],
+    },
   },
   "ai-key-extract": {
     input: "选择待提取的长文本、文档或评论内容。",
     processing: "定义需要识别的信息项、字段格式和未识别内容的处理规则。",
     output: "输出指定关键信息，并按配置写入对应字段。",
+    requiredByForm: {
+      "AI 字段": [
+        { label: "待提取内容", value: "合同正文或需求文档", control: "select" },
+        { label: "提取信息项", value: "客户、金额、日期、风险条款", control: "textarea" },
+        { label: "未识别处理", value: "留空并标记未识别", control: "select" },
+      ],
+      "AI 节点": [
+        { label: "内容来源", value: "需求文档、会议纪要或合同附件", control: "select" },
+        { label: "提取字段", value: "负责人、截止时间、风险和依赖项", control: "textarea" },
+        { label: "字段格式", value: "日期统一为 YYYY-MM-DD", control: "textarea" },
+        { label: "结果写入字段", value: "关键信息提取结果", control: "select" },
+      ],
+    },
   },
   "ai-translate": {
     input: "选择需要翻译的文本字段、原始语言和目标语言。",
     processing: "配置术语表、语气、格式保留和无需翻译的内容。",
     output: "生成保留原始结构和专业术语的目标语言内容。",
+    requiredByForm: {
+      "AI 字段": [
+        { label: "待翻译内容", value: "需求描述", control: "select" },
+        { label: "目标语言", value: "英语", control: "select" },
+        { label: "术语与格式要求", value: "保留产品名、代码和 Markdown 格式", control: "textarea" },
+      ],
+      "AI 节点": [
+        { label: "原文内容", value: "需求描述与验收标准", control: "select" },
+        { label: "目标语言", value: "英语", control: "select" },
+        { label: "翻译要求", value: "使用正式语气并保留术语和段落结构", control: "textarea" },
+        { label: "结果存储字段", value: "英文需求描述", control: "select" },
+      ],
+    },
   },
   "ai-agent-connector": {
     input: "选择发送给智能体的工作项字段、任务描述和可访问上下文。",
     processing: "配置目标智能体、任务指令、超时时间和失败重试规则。",
     output: "接收智能体执行结果、状态和附件，并回写到工作项。",
+    requiredByForm: {
+      "AI 节点": [
+        { label: "目标智能体", value: "研发任务分析智能体", control: "select" },
+        { label: "任务输入", value: "需求描述、技术方案和关联附件", control: "select" },
+        { label: "任务指令", value: "分析实现范围并输出任务拆解与风险", control: "textarea" },
+        { label: "结果存储字段", value: "智能体执行结果", control: "select" },
+      ],
+    },
   },
   "ai-meeting-analysis": {
     input: "选择会议纪要、逐字稿以及关联项目和参与人信息。",
     processing: "配置需要识别的决策、风险、待办和责任人规则。",
     output: "生成会议结论和可跟踪任务，并关联到对应项目工作项。",
+    requiredByForm: {
+      "AI 节点": [
+        { label: "会议内容", value: "会议纪要或逐字稿", control: "select" },
+        { label: "识别内容", value: "结论、风险、待办、负责人和截止时间", control: "textarea" },
+        { label: "任务归属项目", value: "当前项目", control: "select" },
+        { label: "结果存储方式", value: "创建子任务并回写会议结论", control: "select" },
+      ],
+    },
   },
 };
 
 function expandAiSupply(item) {
   if (item.type !== "ai") return [classifySupply(item)];
+
+  const baseConfiguration = aiConfiguration[item.id] || {
+    input: `选择${item.name}处理所需的工作项内容。`,
+    processing: `配置${item.name}的处理目标、规则和输出要求。`,
+    output: item.summary,
+  };
+  const { requiredByForm = {}, ...configurationSummary } = baseConfiguration;
 
   return item.supportedForms.map((form, index) => {
     const slug = aiFormSlug[form];
@@ -1064,11 +1207,8 @@ function expandAiSupply(item) {
       permissions: item.permissionsByForm?.[form],
       permissionsByForm: undefined,
       configuration: {
-        ...(aiConfiguration[item.id] || {
-          input: `选择${item.name}处理所需的工作项内容。`,
-          processing: `配置${item.name}的处理目标、规则和输出要求。`,
-          output: item.summary,
-        }),
+        ...configurationSummary,
+        requiredFields: requiredByForm[form] || [],
         example: item.scenarios?.[index % Math.max(item.scenarios.length, 1)] || item.summary,
       },
       relatedFieldApps: form === "AI 字段" ? item[relatedKey] : [],
