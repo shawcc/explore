@@ -238,7 +238,8 @@ export function DiscoverPage() {
   const { items, notify } = useDemo();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialType = searchParams.get("type");
-  const isExploreVariant = ["explore", "updates", "ai-scenario"].includes(initialType);
+  const isExploreVariant = initialType === null
+    || ["explore", "updates", "ai-scenario"].includes(initialType);
   const requestedExploreSection = searchParams.get("section");
   const exploreSection = initialType === "ai-scenario" || searchParams.get("view") === "scenarios"
     ? "scenarios"
