@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -56,6 +57,51 @@ const CATALOG_LABELS = {
   plugin: "插件",
   template: "模板",
 };
+
+const AI_FORM_FILTERS = ["AI 节点", "AI 操作", "AI 字段"];
+const PLUGIN_SOURCE_FILTERS = [
+  { id: "all", label: "全部" },
+  { id: "market", label: "市场插件" },
+  { id: "enterprise", label: "企业插件" },
+];
+const TEMPLATE_TYPE_FILTERS = [
+  { id: "all", label: "全部" },
+  { id: "template", label: "模板" },
+  { id: "solution", label: "解决方案" },
+];
+
+function buildTagFilters(items) {
+  const counts = new Map();
+  items.forEach((item) => {
+    (item.tags || []).forEach((tag) => counts.set(tag, (counts.get(tag) || 0) + 1));
+  });
+  return [
+    { id: "all", label: "全部", count: items.length },
+    ...[...counts.entries()]
+      .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0], "zh-CN"))
+      .map(([label, count]) => ({ id: label, label, count })),
+  ];
+}
+
+function CatalogFilterGroup({ label, options, value, onChange }) {
+  return (
+    <div className="explore-catalog-filter-group">
+      <strong>{label}</strong>
+      {options.map((option) => (
+        <button
+          type="button"
+          className={value === option.id ? "is-active" : ""}
+          aria-pressed={value === option.id}
+          onClick={() => onChange(option.id)}
+          key={option.id}
+        >
+          <span>{option.label}</span>
+          <small>{option.count}</small>
+        </button>
+      ))}
+    </div>
+  );
+}
 
 function findItem(items, ref) {
   if (!ref) return null;
@@ -317,28 +363,121 @@ export function ExploreContentHub({ items, query = "", section, contentId, onOpe
 
 export function ExploreCatalog({ items, query = "", catalog = "ai" }) {
   const label = CATALOG_LABELS[catalog] || CATALOG_LABELS.ai;
+  const [filters, setFilters] = useState({
+    aiForm: "all",
+    pluginSource: "all",
+    pluginCategory: "all",
+    templateType: "all",
+    templateCategory: "all",
+  });
   const normalizedQuery = query.trim().toLocaleLowerCase("zh-CN");
-  const catalogItems = items.filter((item) => (
+  const sourceItems = items.filter((item) => (
     catalog === "template"
       ? item.type === "template" || item.type === "solution"
       : item.type === catalog
-  )).filter((item) => (
+  ));
+  const pluginSourceItems = sourceItems.filter((item) => (
+    filters.pluginSource === "all" || item.pluginDeveloperScope === filters.pluginSource
+  ));
+  const templateTypeItems = sourceItems.filter((item) => (
+    filters.templateType === "all" || item.type === filters.templateType
+  ));
+  const pluginTagFilters = buildTagFilters(pluginSourceItems);
+  const templateTagFilters = buildTagFilters(templateTypeItems);
+  const filterGroups = catalog === "ai"
+    ? [{
+      label: "形态",
+      value: filters.aiForm,
+      options: [
+        { id: "all", label: "全部", count: sourceItems.length },
+        ...AI_FORM_FILTERS.map((form) => ({
+          id: form,
+          label: form,
+          count: sourceItems.filter((item) => item.aiForm === form).length,
+        })),
+      ],
+      onChange: (value) => setFilters((current) => ({ ...current, aiForm: value })),
+    }]
+    : catalog === "plugin"
+      ? [
+        {
+          label: "来源",
+          value: filters.pluginSource,
+          options: PLUGIN_SOURCE_FILTERS.map((option) => ({
+            ...option,
+            count: sourceItems.filter((item) => (
+              option.id === "all" || item.pluginDeveloperScope === option.id
+            )).length,
+          })),
+          onChange: (value) => setFilters((current) => ({
+            ...current,
+            pluginSource: value,
+            pluginCategory: "all",
+          })),
+        },
+        {
+          label: "分类",
+          value: filters.pluginCategory,
+          options: pluginTagFilters,
+          onChange: (value) => setFilters((current) => ({ ...current, pluginCategory: value })),
+        },
+      ]
+      : [
+        {
+          label: "类型",
+          value: filters.templateType,
+          options: TEMPLATE_TYPE_FILTERS.map((option) => ({
+            ...option,
+            count: sourceItems.filter((item) => option.id === "all" || item.type === option.id).length,
+          })),
+          onChange: (value) => setFilters((current) => ({
+            ...current,
+            templateType: value,
+            templateCategory: "all",
+          })),
+        },
+        {
+          label: "场景",
+          value: filters.templateCategory,
+          options: templateTagFilters,
+          onChange: (value) => setFilters((current) => ({ ...current, templateCategory: value })),
+        },
+      ];
+  const filteredItems = sourceItems.filter((item) => {
+    if (catalog === "ai") return filters.aiForm === "all" || item.aiForm === filters.aiForm;
+    if (catalog === "plugin") {
+      return (filters.pluginSource === "all" || item.pluginDeveloperScope === filters.pluginSource)
+        && (filters.pluginCategory === "all" || item.tags.includes(filters.pluginCategory));
+    }
+    return (filters.templateType === "all" || item.type === filters.templateType)
+      && (filters.templateCategory === "all" || item.tags.includes(filters.templateCategory));
+  });
+  const catalogItems = filteredItems.filter((item) => (
     !normalizedQuery
     || `${item.name} ${item.summary} ${(item.tags || []).join(" ")} ${item.aiForm || ""}`.toLocaleLowerCase("zh-CN").includes(normalizedQuery)
   ));
 
   return (
     <section className="explore-catalog" aria-label={`${label}仓库`}>
-      {catalogItems.length > 0 ? (
-        <div className={`supply-grid supply-grid-${catalog === "template" ? "template" : catalog} explore-catalog-grid`}>
-          {catalogItems.map((item) => <SupplyCard item={item} showAiForm={catalog === "ai"} key={item.id} />)}
+      <div className="explore-catalog-layout">
+        <aside className="explore-catalog-filters" aria-label={`${label}分类`}>
+          {filterGroups.map((group) => (
+            <CatalogFilterGroup {...group} key={group.label} />
+          ))}
+        </aside>
+        <div className="explore-catalog-results">
+          {catalogItems.length > 0 ? (
+            <div className={`supply-grid supply-grid-${catalog === "template" ? "template" : catalog} explore-catalog-grid`}>
+              {catalogItems.map((item) => <SupplyCard item={item} showAiForm={catalog === "ai"} key={item.id} />)}
+            </div>
+          ) : (
+            <div className="explore-hub-empty">
+              <PackageSearch size={24} />
+              <strong>没有匹配的{label}</strong>
+            </div>
+          )}
         </div>
-      ) : (
-        <div className="explore-hub-empty">
-          <PackageSearch size={24} />
-          <strong>没有匹配的{label}</strong>
-        </div>
-      )}
+      </div>
     </section>
   );
 }
