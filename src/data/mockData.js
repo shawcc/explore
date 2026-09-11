@@ -241,13 +241,13 @@ const rawSupplies = [
     relatedActionApps: ["AI 助手"],
     permissionsByForm: {
       "AI 字段": ["读取工作项基础信息", "读取已授权的字段内容", "将处理结果写回指定位置"],
-      "AI 节点": ["读取工作项基础信息", "读取已授权的字段内容", "将处理结果写回指定位置"],
+      "AI 节点": ["读取工作项基础信息", "读取已授权的字段与关联材料", "将处理结果写回指定位置", "在配置指定的节点创建子任务"],
       "AI 操作": ["读取工作项基础信息", "读取已授权的字段内容", "将处理结果写回指定位置"],
     },
     owner: "Meego AI 团队",
     status: "已发布",
-    fullDescription: "通过自定义提示词读取飞书项目中的字段、文本和关联内容，完成生成、总结、提取与判断等任务，并将结果用于字段、节点或自动化操作。",
-    scenarios: ["生成项目内容", "总结工作项信息", "提取关键信息"],
+    fullDescription: "通过自定义指令或最佳实践模板读取飞书项目中的当前实例、字段和关联材料，完成生成、总结、评审与任务拆解，并将结果回填字段或创建子任务。",
+    scenarios: ["PRD 文档评审", "研发任务拆解", "测试用例设计", "项目结项复盘"],
     ...developerCatalogSource,
   },
   {
@@ -978,18 +978,19 @@ const aiFormSlug = {
 
 const aiConfiguration = {
   "ai-assistant-app": {
-    input: "选择需要提供给提示词的工作项字段、描述、评论或关联文档。",
-    processing: "编写任务目标、输出格式和限制条件，并通过变量引用输入内容。",
-    output: "生成符合自定义提示词要求的文本或结构化结果。",
+    input: "选择当前实例中的工作项字段、评论、关联文档或其他可访问材料。",
+    processing: "配置生效条件和执行人员，再从自定义、最佳实践或我的模板中选择指令，并绑定指令引用的字段与节点。",
+    output: "按节点指令生成结果并回填指定字段；支持的最佳实践还可在指定节点创建子任务。",
     requiredByForm: {
       "AI 字段": [
         { label: "待处理的文本", value: "需求描述", control: "select" },
         { label: "处理说明", value: "总结需求目标、范围和验收标准", control: "textarea" },
       ],
       "AI 节点": [
-        { label: "输入内容", value: "需求名称、需求描述、验收标准", control: "select" },
-        { label: "任务指令", value: "提炼关键信息并按项目模板输出", control: "textarea" },
-        { label: "结果存储字段", value: "AI 处理结果", control: "select" },
+        { label: "生效条件", value: "节点流转到当前节点时", control: "select" },
+        { label: "执行任务的人员", value: "节点负责人", control: "select" },
+        { label: "指令内容", value: "最佳实践 · 需求 PRD 文档评审", control: "select" },
+        { label: "字段与动作绑定", value: "PRD 字段 → 评审结果字段 / 创建子任务", control: "textarea" },
       ],
     },
   },

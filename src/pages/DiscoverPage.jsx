@@ -3,6 +3,7 @@ import { BriefcaseBusiness, Building2, FolderOpen, Heart, LayoutTemplate, Plus, 
 import { useSearchParams } from "react-router-dom";
 import { SupplyCard } from "../components/SupplyCard.jsx";
 import { AppIcon } from "../components/AppIcon.jsx";
+import { ExploreDiscovery } from "../components/ExploreDiscovery.jsx";
 import { ErrorPanel, SkeletonGrid } from "../components/StatePanels.jsx";
 import { useDemo } from "../context/DemoContext.jsx";
 import { categoryOrder, TYPE_META } from "../data/mockData.js";
@@ -57,6 +58,13 @@ const templateViewGroups = [
 ];
 
 const discoverTabs = [
+  { id: "ai", label: "AI 应用", icon: "ai" },
+  { id: "plugin", label: "插件", icon: "plugin" },
+  { id: "template", label: "模板", icon: "template" },
+];
+
+const exploreTabs = [
+  { id: "discover", label: "发现" },
   { id: "ai", label: "AI 应用", icon: "ai" },
   { id: "plugin", label: "插件", icon: "plugin" },
   { id: "template", label: "模板", icon: "template" },
@@ -145,7 +153,7 @@ function GlobalSearch({ value, onChange }) {
             onChange("");
           }
         }}
-        placeholder="搜索 AI 应用、插件和模板"
+        placeholder="搜索 AI 应用、场景、插件和模板"
         aria-label="搜索发现中的全部内容"
       />
       {value && (
@@ -230,6 +238,20 @@ export function DiscoverPage() {
   const { items, notify } = useDemo();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialType = searchParams.get("type");
+  const isExploreVariant = ["explore", "updates", "ai-scenario"].includes(initialType);
+  const requestedExploreSection = searchParams.get("section");
+  const exploreSection = initialType === "ai-scenario" || searchParams.get("view") === "scenarios"
+    ? "scenarios"
+    : initialType === "updates"
+      ? "updates"
+      : ["home", "stories", "courses", "practices", "customers", "updates", "catalog", "scenarios"].includes(requestedExploreSection)
+        ? requestedExploreSection
+        : "home";
+  const exploreContentId = searchParams.get("item") || "";
+  const exploreCatalog = ["ai", "plugin", "template"].includes(searchParams.get("catalog"))
+    ? searchParams.get("catalog")
+    : "ai";
+  const activeExploreTab = exploreSection === "catalog" ? exploreCatalog : "discover";
   const [activeTab, setActiveTab] = useState(
     initialType === "solution" || initialType === "template"
       ? "template"
@@ -316,7 +338,7 @@ export function DiscoverPage() {
       template: matches.filter((item) => item.type === "template" || item.type === "solution"),
     };
   }, [items, normalizedGlobalQuery]);
-  const isSearching = Boolean(globalSearchResults);
+  const isSearching = Boolean(globalSearchResults) && !isExploreVariant;
   const globalResultCount = isSearching
     ? Object.values(globalSearchResults).reduce((total, resultItems) => total + resultItems.length, 0)
     : 0;
@@ -349,7 +371,22 @@ export function DiscoverPage() {
     requestAnimationFrame(() => window.scrollTo({ top: tabScroll.current[type] || 0, behavior: "instant" }));
   };
 
-  const templateWorkspaceActive = activeTab === "template";
+  const selectExploreRoute = ({ section = "home", item = "", catalog = "" }) => {
+    setSearchParams((current) => {
+      current.set("type", "explore");
+      current.delete("view");
+      if (section === "home") current.delete("section");
+      else current.set("section", section);
+      if (item) current.set("item", item);
+      else current.delete("item");
+      if (section === "catalog" && catalog) current.set("catalog", catalog);
+      else current.delete("catalog");
+      return current;
+    });
+    requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "instant" }));
+  };
+
+  const templateWorkspaceActive = !isExploreVariant && activeTab === "template";
 
   const selectTemplateView = (view) => {
     setTemplateView(view);
@@ -422,22 +459,46 @@ export function DiscoverPage() {
         </div>
       </div>
 
-      <nav className={`discover-category-nav${isSearching ? " is-searching" : ""}`} aria-label="内容类型">
-        {discoverTabs.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            className={`discover-category-${tab.id}${!isSearching && activeTab === tab.id ? " is-active" : ""}`}
-            onClick={() => switchTab(tab.id)}
-          >
-            <AppIcon name={tab.icon} size={14} />
-            {tab.label}
-          </button>
-        ))}
-        <GlobalSearch value={globalQuery} onChange={updateGlobalQuery} />
-      </nav>
+      {isExploreVariant ? (
+        <div className="discover-explore-toolbar">
+          <nav className="discover-explore-tabs" aria-label="发现内容类型">
+            {exploreTabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                className={activeExploreTab === tab.id ? "is-active" : ""}
+                aria-current={activeExploreTab === tab.id ? "page" : undefined}
+                onClick={() => (
+                  tab.id === "discover"
+                    ? selectExploreRoute({ section: "home" })
+                    : selectExploreRoute({ section: "catalog", catalog: tab.id })
+                )}
+              >
+                {tab.icon ? <AppIcon name={tab.icon} size={14} /> : <Sparkles size={14} />}
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+          <GlobalSearch value={globalQuery} onChange={updateGlobalQuery} />
+        </div>
+      ) : (
+        <nav className={`discover-category-nav${isSearching ? " is-searching" : ""}`} aria-label="内容类型">
+          {discoverTabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              className={`discover-category-${tab.id}${!isSearching && activeTab === tab.id ? " is-active" : ""}`}
+              onClick={() => switchTab(tab.id)}
+            >
+              <AppIcon name={tab.icon} size={14} />
+              {tab.label}
+            </button>
+          ))}
+          <GlobalSearch value={globalQuery} onChange={updateGlobalQuery} />
+        </nav>
+      )}
 
-      <div className={`discover-content-layout${!isSearching && activeTab === "ai" ? " has-ai-nav" : ""}${!isSearching && activeTab === "plugin" ? " has-plugin-nav" : ""}${!isSearching && templateWorkspaceActive ? " has-template-nav" : ""}${isSearching ? " is-searching" : ""}`}>
+      <div className={`discover-content-layout${!isExploreVariant && !isSearching && activeTab === "ai" ? " has-ai-nav" : ""}${!isExploreVariant && !isSearching && activeTab === "plugin" ? " has-plugin-nav" : ""}${!isSearching && templateWorkspaceActive ? " has-template-nav" : ""}${isSearching ? " is-searching" : ""}`}>
       {!isSearching && templateWorkspaceActive && (
         <nav className="template-view-nav" aria-label="模板功能">
           {templateViewGroups.map((group, index) => (
@@ -459,7 +520,7 @@ export function DiscoverPage() {
           ))}
         </nav>
       )}
-      {!isSearching && activeTab === "plugin" && (
+      {!isExploreVariant && !isSearching && activeTab === "plugin" && (
         <nav className="plugin-category-nav" aria-label="插件分类">
           <div className="market-nav-group">
             <strong>开发者</strong>
@@ -490,7 +551,7 @@ export function DiscoverPage() {
           </div>
         </nav>
       )}
-      {!isSearching && activeTab === "ai" && (
+      {!isExploreVariant && !isSearching && activeTab === "ai" && (
         <nav className="ai-category-nav" aria-label="AI 应用形态">
           {aiForms.map((form) => (
             <button
@@ -507,7 +568,7 @@ export function DiscoverPage() {
       )}
 
       <div className="discover-content-main">
-      {!isSearching && activeTab === "plugin" && (
+      {!isExploreVariant && !isSearching && activeTab === "plugin" && (
         <div className="catalog-toolbar plugin-toolbar" aria-label="插件筛选与排序">
           <div className="catalog-toolbar-filters">
             <label>
@@ -540,7 +601,16 @@ export function DiscoverPage() {
         </div>
       )}
 
-      {isSearching ? (
+      {isExploreVariant ? (
+        <ExploreDiscovery
+          items={items}
+          query={globalQuery}
+          section={exploreSection}
+          contentId={exploreContentId}
+          catalog={exploreCatalog}
+          onNavigate={selectExploreRoute}
+        />
+      ) : isSearching ? (
         <section className="discover-search-results" aria-live="polite">
           <header className="discover-search-summary">
             <div>

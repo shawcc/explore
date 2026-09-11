@@ -264,133 +264,23 @@ function AiArticle({ item, onOpenGuide }) {
   );
 }
 
-function MeegoWorkflowScene({ item, converted = false }) {
-  const nodeGroups = [
-    ["IOS开发", "Android开发", "FE开发"],
-    ["IOS测试", "Android测试", "FE测试"],
-  ];
-
-  return (
-    <div className="ai-real-workflow">
-      <div className="ai-real-flow-canvas">
-        <div className="ai-real-flow-chain">
-          <span className="ai-real-flow-node is-done"><i />UI设计</span>
-          <b />
-          <span className="ai-real-flow-node is-done"><i />需求详评</span>
-          <b />
-          <span className="ai-real-flow-node is-done"><i />技术方案评审</span>
-          <b />
-        </div>
-        {nodeGroups.map((group, groupIndex) => (
-          <div className="ai-real-flow-stack" key={group[0]}>
-            {group.map((name) => {
-              const selected = name === "Android测试";
-              return (
-                <span className={`ai-real-flow-node${selected ? " is-selected" : ""}`} key={name}>
-                  <i className={groupIndex === 1 ? "is-waiting" : ""} />
-                  {selected && converted && <AppGlyph item={item} size={14} />}
-                  {name}
-                </span>
-              );
-            })}
-          </div>
-        ))}
-        <b className="ai-real-flow-release-line" />
-        <span className="ai-real-flow-node is-muted"><i />需求发布上线</span>
-      </div>
-      <section className="ai-real-node-detail">
-        <header>
-          <div><ChevronDown size={13} /><i /><strong>Android测试</strong><span>进行中</span></div>
-          <div>
-            {!converted && <button type="button" tabIndex={-1}><Sparkles size={15} />转为 AI 节点</button>}
-            {!converted && <button type="button" className="is-primary" tabIndex={-1}>完成</button>}
-            <MoreHorizontal size={17} />
-          </div>
-        </header>
-        {converted ? (
-          <div className="ai-real-runtime-row">
-            <span><Sparkles size={15} /><strong>{item.name}已停止运行</strong></span>
-            <div>
-              <button type="button" tabIndex={-1}>修改 AI 配置</button>
-              <button type="button" className="is-start" tabIndex={-1}><Play size={14} fill="currentColor" />启动</button>
-              <MoreHorizontal size={16} />
-            </div>
-          </div>
-        ) : (
-          <div className="ai-real-node-fields">
-            <span><small>负责人</small><b>肖赫</b></span>
-            <span><small>总估分</small><b>待填</b></span>
-            <span><small>总排期</small><b>待填</b></span>
-          </div>
-        )}
-      </section>
-    </div>
-  );
-}
+const AI_NODE_INSTANCE_SCENES = {
+  0: { src: "/ai-guide/node-instance/select-instance.png", alt: "在工作项列表中选择测试实例" },
+  1: { src: "/ai-guide/node-instance/select-node.png", alt: "在实例流程中选择目标节点" },
+  2: { src: "/ai-guide/node-instance/select-ai-app.png", alt: "从 AI 节点市场选择 AI 助手" },
+  4: { src: "/ai-guide/node-instance/run-ai-app.png", alt: "在目标节点中运行 AI 应用" },
+};
 
 function AiNodeGuideScene({ item, stepIndex, recipe }) {
-  const appCandidates = [
-    { name: item.name, current: true },
-    { name: "AI 智能洞察" },
-    { name: "AI 智能填单" },
-    { name: "AI PRD 质检" },
-    { name: "智能体连接器" },
-    { name: "AI 生成云文档" },
-    { name: "相似工作项查询" },
-    { name: "PRD 完整性审核" },
-  ].filter((candidate, index, candidates) => candidates.findIndex((entry) => entry.name === candidate.name) === index);
   const outputText = item.configuration?.output || item.summary;
   const requiredFields = getRequiredConfigFields(item);
+  const staticScene = AI_NODE_INSTANCE_SCENES[stepIndex];
 
-  if (stepIndex === 0) {
+  if (staticScene) {
     return (
-      <div className="ai-guide-demo ai-real-instance-table">
-        <div className="ai-real-table-row is-head">
-          <span>需求名称</span><span>需求状态</span><span>当前负责人</span><span>优先级</span><span>业务线</span>
-        </div>
-        {[
-          ["移动端订单管理页面优化", "测试中", "P0", "其他"],
-          ["直播课堂教师端页面优化", "收集用户反馈", "P2", "其他"],
-          ["AI 内容审核后台申诉处理", "收集用户反馈", "P1", "AI"],
-          ["智能风控模型接入征信数据", "需求上线", "P2", "基础建设"],
-          ["多语言客服新增越南语支持", "方案设计", "P1", "基础建设"],
-        ].map(([name, status, priority, line], index) => (
-          <button type="button" className={`ai-real-table-row${index === 2 ? " is-selected" : ""}`} key={name} tabIndex={-1}>
-            <span><i>{index + 1}</i><strong>{name}</strong></span>
-            <span><b className={`status-${index}`}>{status}</b></span>
-            <span><i className="ai-real-avatar">肖</i>肖赫</span>
-            <span><b className="ai-real-priority">{priority}</b></span>
-            <span><b className="ai-real-line">{line}</b>{index === 2 && <Check size={13} />}</span>
-          </button>
-        ))}
-      </div>
-    );
-  }
-
-  if (stepIndex === 1) return <MeegoWorkflowScene item={item} />;
-
-  if (stepIndex === 2) {
-    return (
-      <div className="ai-guide-demo ai-real-market-demo">
-        <header><span><Sparkles size={15} />AI 节点市场</span><X size={15} /></header>
-        <div className="ai-real-market-tools">
-          <label><Search size={14} /><span>搜索</span></label>
-          <button type="button" tabIndex={-1}>新建 AI 节点</button>
-        </div>
-        <div className="ai-real-market-banner"><strong>使用 <b>AI 节点</b><br />流程一键智能化，实现百倍效能</strong><Sparkles size={28} /></div>
-        <div className="ai-real-market-grid">
-          {appCandidates.map((candidate) => (
-            <button type="button" className={candidate.current ? "is-selected" : ""} key={candidate.name} tabIndex={-1}>
-              <span className="ai-real-market-icon">
-                {candidate.current ? <AppGlyph item={item} size={24} /> : <Bot size={20} />}
-              </span>
-              <strong>{candidate.name}</strong>
-              <small>{candidate.current ? "已选择当前应用" : "嵌入业务流程的智能节点"}</small>
-              {candidate.current && <Check size={14} />}
-            </button>
-          ))}
-        </div>
-      </div>
+      <figure className="ai-node-static-scene">
+        <img src={staticScene.src} alt={staticScene.alt} />
+      </figure>
     );
   }
 
@@ -422,8 +312,6 @@ function AiNodeGuideScene({ item, stepIndex, recipe }) {
       </div>
     );
   }
-
-  if (stepIndex === 4) return <MeegoWorkflowScene item={item} converted />;
 
   return (
     <div className="ai-guide-demo ai-guide-result-demo">
