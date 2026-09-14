@@ -11504,18 +11504,43 @@ body {
 }
 
 .assistant-prompt-card {
+  --prompt-accent: #446dff;
+  --prompt-border: #cbd8ff;
+  --prompt-surface: #f1f5ff;
+  --prompt-action-soft: #e6edff;
   display: grid;
   min-width: 0;
   overflow: hidden;
-  border: 1px solid #d8dce3;
+  border: 1px solid var(--prompt-border);
+  border-top: 3px solid var(--prompt-accent);
   border-radius: 8px;
-  background: #fff;
+  background: var(--prompt-surface);
   transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
 }
 
+.assistant-prompt-card:nth-child(4n + 2) {
+  --prompt-accent: #0f9278;
+  --prompt-border: #bfe5da;
+  --prompt-surface: #effaf7;
+  --prompt-action-soft: #dff5ef;
+}
+
+.assistant-prompt-card:nth-child(4n + 3) {
+  --prompt-accent: #b46b08;
+  --prompt-border: #ecd6a8;
+  --prompt-surface: #fff8e9;
+  --prompt-action-soft: #f9edcf;
+}
+
+.assistant-prompt-card:nth-child(4n) {
+  --prompt-accent: #d6534a;
+  --prompt-border: #edcbc7;
+  --prompt-surface: #fff3f1;
+  --prompt-action-soft: #fae5e2;
+}
+
 .assistant-prompt-card:hover {
-  border-color: #aeb4bd;
-  box-shadow: 0 8px 24px rgba(31, 35, 41, 0.08);
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--prompt-accent) 14%, transparent);
   transform: translateY(-2px);
 }
 
@@ -11546,10 +11571,10 @@ body {
   grid-template-rows: 1fr auto;
   margin: 0 12px 12px;
   padding: 15px 16px 12px;
-  border: 1px solid #d8dce3;
+  border: 1px solid color-mix(in srgb, var(--prompt-border) 78%, #fff);
   border-radius: 6px;
-  background: #fff;
-  box-shadow: inset 0 1px 2px rgba(31, 35, 41, 0.03);
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 1px 2px rgba(31, 35, 41, 0.03);
 }
 
 .assistant-prompt-footer {
@@ -11570,13 +11595,13 @@ body {
   border: 0;
   border-radius: 4px;
   background: transparent;
-  color: #3370ff;
+  color: var(--prompt-accent);
   cursor: pointer;
   transition: background 0.16s ease, color 0.16s ease;
 }
 
 .assistant-prompt-content button:hover {
-  background: #f0f4ff;
+  background: var(--prompt-action-soft);
 }
 
 .assistant-prompt-content button.is-copied {
@@ -11635,10 +11660,10 @@ body {
 
 .assistant-prompt-surfaces span {
   padding: 3px 7px;
-  border: 1px solid #d8e2ff;
+  border: 1px solid var(--prompt-border);
   border-radius: 4px;
-  background: #f2f5ff;
-  color: #315efb;
+  background: var(--prompt-action-soft);
+  color: var(--prompt-accent);
   font-weight: 600;
   white-space: nowrap;
 }
