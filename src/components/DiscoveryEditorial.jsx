@@ -47,12 +47,33 @@ async function copyText(value) {
 const promptVariables = ["填入云文档地址", "指定节点字段", "指定字段", "PRD字段", "SRD字段", "节点名称"];
 const promptVariablePattern = new RegExp(`(${promptVariables.join("|")})`, "g");
 
+function FieldVariableIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 16 16">
+      <rect height="8" rx="1.5" width="13" x="1.5" y="4" />
+      <path d="M5 6v4M4.2 6h1.6M4.2 10h1.6" />
+    </svg>
+  );
+}
+
 function renderPromptContent(prompt) {
-  return prompt.split(promptVariablePattern).map((part, index) => (
-    promptVariables.includes(part) ? (
-      <span className="assistant-prompt-variable" key={`${part}-${index}`}>{part}</span>
-    ) : part
-  ));
+  const parts = prompt.split(promptVariablePattern);
+
+  return parts.map((part, index) => {
+    if (promptVariables.includes(part)) {
+      return (
+        <span className="assistant-prompt-variable" key={`${part}-${index}`}>
+          <FieldVariableIcon />
+          {part}
+        </span>
+      );
+    }
+
+    let content = part;
+    if (promptVariables.includes(parts[index - 1])) content = content.replace(/^\s+/, " ");
+    if (promptVariables.includes(parts[index + 1])) content = content.replace(/\s+$/, " ");
+    return content;
+  });
 }
 
 function PromptTemplateCard({

@@ -11585,31 +11585,42 @@ body {
 
 .assistant-prompt-content pre {
   display: -webkit-box;
-  min-height: 126px;
-  max-height: 126px;
+  min-height: 140px;
+  max-height: 140px;
   margin: 0;
   overflow: hidden;
-  color: #373c43;
-  font: 12px/1.8 inherit;
+  color: #1f2329;
+  font: 14px/28px inherit;
   white-space: pre-wrap;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 6;
+  -webkit-line-clamp: 5;
 }
 
 .assistant-prompt-variable {
   display: inline-flex;
-  min-height: 20px;
+  height: 24px;
   align-items: center;
-  margin: 0 2px;
+  margin: 0 1px;
   padding: 0 6px;
-  border: 1px solid #d8e2ff;
+  border: 0;
   border-radius: 4px;
-  background: #f2f5ff;
-  color: #5b73e8;
-  font-size: 11px;
-  line-height: 18px;
+  background: rgba(50, 80, 235, 0.08);
+  color: #1f2329;
+  font-size: 14px;
+  line-height: 24px;
   vertical-align: baseline;
   white-space: nowrap;
+}
+
+.assistant-prompt-variable svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  margin-right: 2px;
+  fill: none;
+  stroke: #3250eb;
+  stroke-linecap: round;
+  stroke-width: 1.3;
 }
 
 .assistant-prompt-surfaces {
