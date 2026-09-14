@@ -182,7 +182,6 @@ function SearchResultGroup({ type, label, items, query }) {
           <SupplyCard
             key={item.id}
             item={item}
-            showAiForm={type === "ai"}
             searchMatchDetail={getDetailMatch(item, query)}
           />
         ))}

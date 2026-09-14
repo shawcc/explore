@@ -14,15 +14,6 @@ export const AI_SCENE_GOALS = WORK_GOALS.map((goal) => ({
   }[goal.id],
 }));
 
-const contentGoalMap = {
-  "信息提取与补全": "automation",
-  "计划拆解与协同": "collaboration",
-  "分类分派与流转": "collaboration",
-  "质量检查与审核": "risk",
-  "分析评估与预警": "risk",
-  "内容撰写与总结": "knowledge",
-};
-
 const formLabels = {
   "AI节点": "AI 节点",
   "AI字段": "AI 字段",
@@ -38,16 +29,15 @@ function buildOfficialTemplates(aiItems) {
     kind: "official-template",
     title: template.title,
     description: template.scenario || template.desc,
-    goalId: contentGoalMap[template.workGoal] || assistantNode.primaryGoal,
+    goalId: assistantNode.primaryGoal,
     form: formLabels[template.subtype] || "AI 节点",
     appName: assistantNode.name,
     appIcon: assistantNode.appIcon,
     detailRoute: assistantNode.detailRoute,
-    role: template.role,
-    tags: template.tags || [],
-    context: template.problem,
-    outcome: template.expectedOutput,
-    steps: template.steps || [],
+    tags: [],
+    context: template.scenario,
+    outcome: template.scenario,
+    steps: [],
     prompt: template.prompt,
     sourceLabel: "AI 助手官方模板",
     appItem: assistantNode,

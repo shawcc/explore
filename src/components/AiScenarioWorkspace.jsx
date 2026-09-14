@@ -50,7 +50,7 @@ function SceneCard({ scene, onNavigate }) {
       <p>{scene.description}</p>
       <div className="ai-scene-tags">
         <span>{scene.form}</span>
-        <span>{scene.role}</span>
+        {scene.role && <span>{scene.role}</span>}
         {scene.tags.slice(0, 1).map((tag) => <span key={tag}>{tag}</span>)}
       </div>
       <footer>

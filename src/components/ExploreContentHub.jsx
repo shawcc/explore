@@ -364,7 +364,7 @@ export function ExploreContentHub({ items, query = "", section, contentId, onOpe
 export function ExploreCatalog({ items, query = "", catalog = "ai" }) {
   const label = CATALOG_LABELS[catalog] || CATALOG_LABELS.ai;
   const [filters, setFilters] = useState({
-    aiForm: "all",
+    aiForm: AI_FORM_FILTERS[0],
     pluginSource: "all",
     pluginCategory: "all",
     templateType: "all",
@@ -388,14 +388,11 @@ export function ExploreCatalog({ items, query = "", catalog = "ai" }) {
     ? [{
       label: "形态",
       value: filters.aiForm,
-      options: [
-        { id: "all", label: "全部", count: sourceItems.length },
-        ...AI_FORM_FILTERS.map((form) => ({
-          id: form,
-          label: form,
-          count: sourceItems.filter((item) => item.aiForm === form).length,
-        })),
-      ],
+      options: AI_FORM_FILTERS.map((form) => ({
+        id: form,
+        label: form,
+        count: sourceItems.filter((item) => item.aiForm === form).length,
+      })),
       onChange: (value) => setFilters((current) => ({ ...current, aiForm: value })),
     }]
     : catalog === "plugin"
@@ -444,7 +441,7 @@ export function ExploreCatalog({ items, query = "", catalog = "ai" }) {
         },
       ];
   const filteredItems = sourceItems.filter((item) => {
-    if (catalog === "ai") return filters.aiForm === "all" || item.aiForm === filters.aiForm;
+    if (catalog === "ai") return item.aiForm === filters.aiForm;
     if (catalog === "plugin") {
       return (filters.pluginSource === "all" || item.pluginDeveloperScope === filters.pluginSource)
         && (filters.pluginCategory === "all" || item.tags.includes(filters.pluginCategory));
@@ -468,7 +465,7 @@ export function ExploreCatalog({ items, query = "", catalog = "ai" }) {
         <div className="explore-catalog-results">
           {catalogItems.length > 0 ? (
             <div className={`supply-grid supply-grid-${catalog === "template" ? "template" : catalog} explore-catalog-grid`}>
-              {catalogItems.map((item) => <SupplyCard item={item} showAiForm={catalog === "ai"} key={item.id} />)}
+              {catalogItems.map((item) => <SupplyCard item={item} key={item.id} />)}
             </div>
           ) : (
             <div className="explore-hub-empty">

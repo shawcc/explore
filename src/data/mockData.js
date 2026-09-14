@@ -980,7 +980,7 @@ const aiConfiguration = {
   "ai-assistant-app": {
     input: "选择当前实例中的工作项字段、评论、关联文档或其他可访问材料。",
     processing: "配置生效条件和执行人员，再从自定义、最佳实践或我的模板中选择指令，并绑定指令引用的字段与节点。",
-    output: "按节点指令生成结果并回填指定字段；支持的最佳实践还可在指定节点创建子任务。",
+    output: "按所选指令生成结果并回填指定位置；支持的最佳实践还可创建子任务。",
     requiredByForm: {
       "AI 字段": [
         { label: "待处理的文本", value: "需求描述", control: "select" },

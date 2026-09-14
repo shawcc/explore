@@ -1,7 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useDemo } from "../context/DemoContext.jsx";
-import { TYPE_META } from "../data/mockData.js";
 import { AppGlyph } from "./AppGlyph.jsx";
 import { AppIcon } from "./AppIcon.jsx";
 
@@ -77,10 +76,9 @@ function Cover({ item }) {
   return <SolutionPreview item={item} />;
 }
 
-export function SupplyCard({ item, showAiForm = false, searchMatchDetail = "" }) {
+export function SupplyCard({ item, searchMatchDetail = "" }) {
   const location = useLocation();
   const { setLastDiscoverLocation } = useDemo();
-  const meta = TYPE_META[item.type];
   const isApp = item.type === "ai" || item.type === "plugin";
 
   const rememberLocation = () => {
@@ -105,32 +103,7 @@ export function SupplyCard({ item, showAiForm = false, searchMatchDetail = "" })
           </p>
         )}
 
-        {item.type === "ai" && showAiForm && (
-          <div className="card-specific app-card-meta search-ai-form">
-            <div className="tag-list"><span>{item.aiForm}</span></div>
-          </div>
-        )}
-        {item.type === "plugin" && (
-          <div className="card-specific app-card-meta">
-            <div className="tag-list">{item.tags.slice(0, 2).map((tag) => <span key={tag}>{tag}</span>)}</div>
-          </div>
-        )}
-        {item.type === "template" && (
-          <div className="card-specific template-meta">
-            <div className="tag-list">{item.tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
-          </div>
-        )}
-        {item.type === "solution" && (
-          <div className="card-specific">
-            <span className="specific-label">场景</span>
-            <div className="tag-list">{item.tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
-          </div>
-        )}
-
-        <div className="card-action">
-          <span>{item.type === "template" ? "查看模板" : item.type === "solution" ? "查看方案" : "查看详情"}</span>
-          <ArrowRight size={16} />
-        </div>
+        <div className="card-action" aria-hidden="true"><ArrowRight size={16} /></div>
       </div>
     </article>
   );

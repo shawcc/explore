@@ -44,6 +44,17 @@ async function copyText(value) {
   textarea.remove();
 }
 
+const promptVariables = ["填入云文档地址", "指定节点字段", "指定字段", "PRD字段", "SRD字段", "节点名称"];
+const promptVariablePattern = new RegExp(`(${promptVariables.join("|")})`, "g");
+
+function renderPromptContent(prompt) {
+  return prompt.split(promptVariablePattern).map((part, index) => (
+    promptVariables.includes(part) ? (
+      <span className="assistant-prompt-variable" key={`${part}-${index}`}>{part}</span>
+    ) : part
+  ));
+}
+
 function PromptTemplateCard({
   template,
   copied,
@@ -56,12 +67,10 @@ function PromptTemplateCard({
         <p>{template.scenario}</p>
       </div>
       <div className="assistant-prompt-content">
-        <pre>{template.prompt}</pre>
+        <pre>{renderPromptContent(template.prompt)}</pre>
         <footer className="assistant-prompt-footer">
           <div className="assistant-prompt-surfaces" aria-label="适用形态">
-            <span>AI 节点</span>
-            <span>AI 字段</span>
-            <span>AI 操作</span>
+            <span>{template.subtype === "AI节点" ? "AI 节点" : template.subtype}</span>
           </div>
           <button
             type="button"
