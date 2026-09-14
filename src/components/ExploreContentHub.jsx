@@ -158,7 +158,7 @@ function ContentVisual({ entry, index }) {
     return (
       <div className="explore-library-image">
         <img src={entry.coverImage || entry.image} alt={entry.imageAlt || `${entry.title}内容封面`} />
-        {entry.imageAlt && <span>行业场景示意</span>}
+        {entry.visualLabel && <span>{entry.visualLabel}</span>}
       </div>
     );
   }
@@ -248,7 +248,7 @@ function ContentDetail({ section, entry, onBack }) {
           {detailImage ? (
             <>
               <img src={detailImage} alt={entry.imageAlt || `${entry.title}内容封面`} />
-              {entry.imageAlt && <span>行业场景示意</span>}
+              {entry.visualLabel && <span>{entry.visualLabel}</span>}
             </>
           ) : entry.item ? (
             <div className="explore-detail-glyph">

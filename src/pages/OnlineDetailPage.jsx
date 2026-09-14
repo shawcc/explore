@@ -1,9 +1,10 @@
 import { Fragment, useState } from "react";
-import { ArrowLeft, Check, ChevronRight, Heart, Share2, ShieldCheck } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ChevronRight, Heart, Share2, X } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppGlyph } from "../components/AppGlyph.jsx";
 import { AppIcon } from "../components/AppIcon.jsx";
 import { useDemo } from "../context/DemoContext.jsx";
+import { getAiOfficialDetail } from "../data/aiOfficialDetails.js";
 import { supplies } from "../data/mockData.js";
 
 const TYPE_LABELS = {
@@ -12,12 +13,6 @@ const TYPE_LABELS = {
   template: "模板",
   solution: "解决方案",
 };
-
-const DEFAULT_AI_PERMISSIONS = [
-  "读取工作项基础信息",
-  "读取已授权的字段内容",
-  "将处理结果写回指定位置",
-];
 
 function HeroVisual({ item }) {
   if (item.coverImage) {
@@ -84,82 +79,120 @@ function EditorImage({ item, caption }) {
   );
 }
 
-function AiArticle({ item }) {
-  const capabilityFacts = [
-    { label: "应用形态", value: item.aiForm },
-    { label: "处理内容", value: item.configuration?.input || "当前工作项中已授权的字段、文本与关联内容" },
-    { label: "输出结果", value: item.configuration?.output || item.summary },
-  ];
+function AiOfficialDetail({ item, onBack }) {
+  const detail = getAiOfficialDetail(item);
+  const [activeTab, setActiveTab] = useState("overview");
+  const showPermissions = Boolean(detail.permissions?.length);
+  const paragraphs = detail.overview.split(/\n{2,}/).filter(Boolean);
+
   return (
-    <>
-      <h2>能力介绍</h2>
-      <p>{item.fullDescription || item.summary}</p>
-      <p>该应用只处理当前空间中已授权的数据，实际读取范围与输出位置由具体配置和空间权限共同决定。</p>
-
-      <dl className="ai-capability-summary" aria-label="能力概览">
-        {capabilityFacts.map((fact) => (
-          <div key={fact.label}>
-            <dt>{fact.label}</dt>
-            <dd>{fact.value}</dd>
-          </div>
-        ))}
-      </dl>
-
-      <h2>典型场景</h2>
-      <ul className="ai-scenario-list">
-        {(item.scenarios || []).map((scenario) => <li key={scenario}><Check size={15} />{scenario}</li>)}
-      </ul>
-
-      <blockquote>AI 生成内容可能存在偏差。涉及关键决策、合规判断或对外发布时，建议保留人工确认。</blockquote>
-    </>
-  );
-}
-
-function AiPermissions({ item }) {
-  const permissions = item.permissions || DEFAULT_AI_PERMISSIONS;
-  return (
-    <>
-      <h2>权限说明</h2>
-      <p>以下权限仅对应当前{item.aiForm}应用，不与其他类型的同名应用合并计算。</p>
-      <div className="ai-permission-groups">
-        <section className="ai-permission-group">
-          <div className="ai-permission-group-heading">
-            <strong>应用权限</strong>
-            <span>{item.aiForm}</span>
-          </div>
-          <ul>
-            {permissions.map((permission) => (
-              <li key={permission}><ShieldCheck size={16} />{permission}</li>
-            ))}
-          </ul>
-        </section>
-      </div>
-    </>
-  );
-}
-
-function AiDetailTabs({ activeTab, onChange }) {
-  const tabs = [
-    { id: "overview", label: "概述" },
-    { id: "permissions", label: "权限" },
-  ];
-  return (
-    <div className="online-detail-tabs" role="tablist" aria-label="AI 应用详情">
-      {tabs.map((tab) => (
+    <main className="page online-ai-official-page">
+      <section className="ai-official-shell">
         <button
-          id={`ai-${tab.id}-tab`}
-          key={tab.id}
           type="button"
-          role="tab"
-          aria-controls={`ai-${tab.id}-panel`}
-          aria-selected={activeTab === tab.id}
-          className={activeTab === tab.id ? "is-active" : ""}
-          onClick={() => onChange(tab.id)}
+          className="ai-official-close"
+          onClick={onBack}
+          title="关闭"
+          aria-label="关闭 AI 应用详情"
         >
-          {tab.label}
+          <X size={20} />
         </button>
-      ))}
-    </div>
+
+        <header className="ai-official-hero">
+          <div className="ai-official-intro">
+            <div className="ai-official-identity">
+              {detail.icon ? (
+                <img src={detail.icon} alt={`${detail.name}官方图标`} />
+              ) : (
+                <AppGlyph item={item} size={64} />
+              )}
+              <div>
+                <div className="ai-official-title">
+                  <h1>{detail.name}</h1>
+                  <span>{detail.tier}</span>
+                </div>
+                <p>{detail.summary}</p>
+              </div>
+            </div>
+          </div>
+
+          {detail.heroImage ? (
+            <img
+              className="ai-official-hero-image"
+              src={detail.heroImage}
+              alt={`${detail.name}官方场景图`}
+            />
+          ) : (
+            <div className="ai-official-hero-fallback">
+              {detail.icon ? <img src={detail.icon} alt="" /> : <AppGlyph item={item} size={78} />}
+            </div>
+          )}
+        </header>
+
+        <div className="ai-official-tabs" role="tablist" aria-label="AI 应用详情">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === "overview"}
+            className={activeTab === "overview" ? "is-active" : ""}
+            onClick={() => setActiveTab("overview")}
+          >
+            概览
+          </button>
+          {showPermissions && (
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === "permissions"}
+              className={activeTab === "permissions" ? "is-active" : ""}
+              onClick={() => setActiveTab("permissions")}
+            >
+              权限
+            </button>
+          )}
+        </div>
+
+        <div className="ai-official-body">
+          <article className="ai-official-copy" role="tabpanel">
+            {activeTab === "overview" ? (
+              paragraphs.map((paragraph, index) => (
+                <p
+                  className={paragraph.startsWith("【") || paragraph.endsWith("：") ? "is-heading" : ""}
+                  key={`${detail.baseId}-${index}`}
+                >
+                  {paragraph}
+                </p>
+              ))
+            ) : (
+              <ul className="ai-official-permissions">
+                {detail.permissions.map((permission) => (
+                  <li key={permission}><CheckCircle2 size={17} />{permission}</li>
+                ))}
+              </ul>
+            )}
+          </article>
+
+          <aside className="ai-official-meta">
+            <h2>基本信息</h2>
+            <dl>
+              <div>
+                <dt>创作者</dt>
+                <dd>
+                  {detail.icon && <img src={detail.icon} alt="" />}
+                  {detail.creator}
+                </dd>
+              </div>
+              {detail.updatedAt && (
+                <div>
+                  <dt>最近一次更新</dt>
+                  <dd>更新于 {detail.updatedAt}</dd>
+                </div>
+              )}
+            </dl>
+          </aside>
+        </div>
+      </section>
+    </main>
   );
 }
 
@@ -246,7 +279,7 @@ function TemplateArticle({ item }) {
   );
 }
 
-function DetailAside({ item, onHelp }) {
+function DetailAside({ item }) {
   const modules = item.includes || item.coverage || [];
   return (
     <aside className="online-detail-aside">
@@ -255,15 +288,8 @@ function DetailAside({ item, onHelp }) {
         <div><dt>{item.type === "ai" ? "创作者" : item.type === "plugin" ? "开发者" : "维护方"}</dt><dd>{item.developer || item.provider}</dd></div>
         <div><dt>更新时间</dt><dd>2026-08-13</dd></div>
         <div><dt>语言</dt><dd>简体中文</dd></div>
-        {item.type === "ai" && <div><dt>应用类型</dt><dd>{item.aiForm}</dd></div>}
         {item.type === "plugin" && <div><dt>价格</dt><dd>{item.isPaid ? "付费" : "免费"}</dd></div>}
       </dl>
-      {item.type === "ai" && (
-        <section>
-          <h3>帮助与支持</h3>
-          <button type="button" className="online-detail-help-link" onClick={onHelp}>查看帮助文档</button>
-        </section>
-      )}
       {modules.length > 0 && (
         <section>
           <h3>{item.type === "solution" ? "方案组成" : "配置与数据"}</h3>
@@ -281,7 +307,6 @@ export function DetailPage() {
   const navigate = useNavigate();
   const { lastDiscoverLocation, notify } = useDemo();
   const [favorite, setFavorite] = useState(false);
-  const [activeDetailTab, setActiveDetailTab] = useState("overview");
   const item = supplies.find((candidate) => candidate.id === id)
     || supplies.find((candidate) => candidate.baseId === id);
   const back = () => navigate(sessionStorage.getItem("discover-return") || lastDiscoverLocation || "/discover");
@@ -299,6 +324,15 @@ export function DetailPage() {
     notify(item.type === "plugin" ? "已模拟进入插件安装页" : item.type === "template" ? "已模拟打开模板使用流程" : "已模拟打开完整方案");
   };
 
+  if (item.type === "ai") {
+    return (
+      <AiOfficialDetail
+        item={item}
+        onBack={back}
+      />
+    );
+  }
+
   return (
     <main className={`page online-detail-page online-detail-page-${item.type}`}>
       <button type="button" className="online-detail-back" onClick={back}><ArrowLeft size={15} />返回发现</button>
@@ -311,24 +345,10 @@ export function DetailPage() {
       />
       <div className="online-detail-content">
         <article className="online-editor-body">
-          {item.type === "ai" && (
-            <>
-              <AiDetailTabs activeTab={activeDetailTab} onChange={setActiveDetailTab} />
-              <div
-                id={`ai-${activeDetailTab}-panel`}
-                className="online-detail-tab-panel"
-                role="tabpanel"
-                aria-labelledby={`ai-${activeDetailTab}-tab`}
-              >
-                {activeDetailTab === "overview" && <AiArticle item={item} />}
-                {activeDetailTab === "permissions" && <AiPermissions item={item} />}
-              </div>
-            </>
-          )}
           {item.type === "plugin" && <PluginArticle item={item} />}
           {(item.type === "template" || item.type === "solution") && <TemplateArticle item={item} />}
         </article>
-        <DetailAside item={item} onHelp={() => notify("已模拟打开帮助文档")} />
+        <DetailAside item={item} />
       </div>
     </main>
   );

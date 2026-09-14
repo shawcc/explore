@@ -5,9 +5,12 @@ import {
   CalendarDays,
   Check,
   Copy,
+  Maximize2,
   Sparkles,
+  X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { aiAssistantOfficialTemplates } from "../data/aiOfficialTemplates.js";
 import { discoveryEditorialContent } from "../data/discoveryEditorial.js";
 import { ProductUpdates } from "./ProductUpdates.jsx";
@@ -80,7 +83,30 @@ function PromptTemplateCard({
   template,
   copied,
   onCopy,
+  onOpen,
 }) {
+  const promptRef = useRef(null);
+  const [isOverflowing, setIsOverflowing] = useState(false);
+
+  useEffect(() => {
+    const prompt = promptRef.current;
+    if (!prompt) return undefined;
+
+    const measure = () => {
+      setIsOverflowing(prompt.scrollHeight > prompt.clientHeight + 1);
+    };
+    const observer = new ResizeObserver(measure);
+
+    measure();
+    observer.observe(prompt);
+    window.addEventListener("resize", measure);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [template.prompt]);
+
   return (
     <article className="assistant-prompt-card">
       <div className="assistant-prompt-scene">
@@ -88,7 +114,20 @@ function PromptTemplateCard({
         <p>{template.scenario}</p>
       </div>
       <div className="assistant-prompt-content">
-        <pre>{renderPromptContent(template.prompt)}</pre>
+        <div className={`assistant-prompt-preview${isOverflowing ? " is-overflowing" : ""}`}>
+          <pre ref={promptRef}>{renderPromptContent(template.prompt)}</pre>
+          {isOverflowing && (
+            <button
+              type="button"
+              className="assistant-prompt-expand"
+              onClick={() => onOpen(template)}
+              title="查看完整 Prompt"
+              aria-label={`查看${template.title}完整 Prompt`}
+            >
+              <Maximize2 size={15} />
+            </button>
+          )}
+        </div>
         <footer className="assistant-prompt-footer">
           <div className="assistant-prompt-surfaces" aria-label="适用形态">
             <span>{template.subtype === "AI节点" ? "AI 节点" : template.subtype}</span>
@@ -108,21 +147,72 @@ function PromptTemplateCard({
   );
 }
 
+function PromptDialog({ template, copied, onClose, onCopy }) {
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    document.body.classList.add("has-prompt-dialog");
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.classList.remove("has-prompt-dialog");
+    };
+  }, [onClose]);
+
+  return (
+    <div className="assistant-prompt-dialog-backdrop" role="presentation" onMouseDown={onClose}>
+      <article
+        className="assistant-prompt-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="assistant-prompt-dialog-title"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <header>
+          <div>
+            <span>AI 节点</span>
+            <h2 id="assistant-prompt-dialog-title">{template.title}</h2>
+            <p>{template.scenario}</p>
+          </div>
+          <button type="button" onClick={onClose} title="关闭" aria-label="关闭完整 Prompt">
+            <X size={18} />
+          </button>
+        </header>
+        <div className="assistant-prompt-dialog-content">
+          <pre>{renderPromptContent(template.prompt)}</pre>
+        </div>
+        <footer>
+          <span>完整 Prompt</span>
+          <button
+            type="button"
+            className={copied ? "is-copied" : ""}
+            onClick={() => onCopy(template)}
+          >
+            {copied ? <Check size={15} /> : <Copy size={15} />}
+            {copied ? "已复制" : "复制 Prompt"}
+          </button>
+        </footer>
+      </article>
+    </div>
+  );
+}
+
 function buildPracticeFeed(content) {
   const groups = [
-    content.customerStories.map((entry) => ({
-      ...entry,
-      kind: "customer",
-      section: "stories",
-      typeLabel: "客户案例",
-      sourceLabel: "业务现场",
-    })),
     content.liveClasses.map((entry) => ({
       ...entry,
       kind: "course",
       section: "stories",
       typeLabel: "直播回放",
       sourceLabel: "官方课程",
+    })),
+    content.customerStories.map((entry) => ({
+      ...entry,
+      kind: "customer",
+      section: "stories",
+      typeLabel: "客户案例",
+      sourceLabel: "业务现场",
     })),
     content.bestPractices.map((entry) => ({
       ...entry,
@@ -145,16 +235,18 @@ function PracticeCard({ entry, onOpen, featured = false }) {
     : entry.kind === "course"
       ? CalendarDays
       : BookOpenText;
-  const image = entry.image || entry.coverImage;
+  const image = entry.coverImage || entry.image;
 
   return (
     <article className={`ai-practice-card is-${entry.kind}${featured ? " is-featured" : ""}`}>
       <button type="button" onClick={() => onOpen(entry.section, entry.id)} aria-label={`查看${entry.title}`} />
-      {image ? (
-        <img src={image} alt={entry.imageAlt || `${entry.title}内容封面`} />
-      ) : (
-        <div className="ai-practice-placeholder"><TypeIcon size={26} /></div>
-      )}
+      <div className="ai-practice-media">
+        {image ? (
+          <img src={image} alt={entry.imageAlt || `${entry.title}内容封面`} />
+        ) : (
+          <div className="ai-practice-placeholder"><TypeIcon size={26} /></div>
+        )}
+      </div>
       <div className="ai-practice-copy">
         <div className="ai-practice-meta">
           <span><TypeIcon size={13} />{entry.typeLabel}</span>
@@ -177,6 +269,7 @@ export function DiscoveryEditorial({
   onOpenContent,
 }) {
   const [copiedId, setCopiedId] = useState("");
+  const [openTemplate, setOpenTemplate] = useState(null);
   const normalizedQuery = query.trim().toLocaleLowerCase("zh-CN");
   const visibleTemplates = aiAssistantOfficialTemplates.filter((entry) => includesQuery(entry, normalizedQuery));
   const practiceFeed = buildPracticeFeed(discoveryEditorialContent)
@@ -191,7 +284,8 @@ export function DiscoveryEditorial({
   };
 
   return (
-    <div className="discovery-journal is-utility-led">
+    <>
+      <div className="discovery-journal is-utility-led">
       <section className="assistant-task-library" aria-labelledby="assistant-task-library-title">
         <header className="utility-section-heading">
           <div>
@@ -206,6 +300,7 @@ export function DiscoveryEditorial({
                 template={template}
                 copied={copiedId === template.id}
                 onCopy={handleCopy}
+                onOpen={setOpenTemplate}
                 key={template.id}
               />
             ))}
@@ -252,6 +347,16 @@ export function DiscoveryEditorial({
           </div>
         )}
       </section>
-    </div>
+      </div>
+      {openTemplate && createPortal(
+        <PromptDialog
+          template={openTemplate}
+          copied={copiedId === openTemplate.id}
+          onClose={() => setOpenTemplate(null)}
+          onCopy={handleCopy}
+        />,
+        document.body,
+      )}
+    </>
   );
 }

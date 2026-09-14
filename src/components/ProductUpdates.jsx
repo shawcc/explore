@@ -56,25 +56,37 @@ function ReleaseShowcase({ entries, onOpen }) {
     <div className="release-showcase">
       <article className="release-feature">
         <button type="button" aria-label={`查看${latest.title}`} onClick={() => onOpen?.(latest.id)} />
-        <img src={latest.image} alt={latest.imageAlt} />
-        <div>
-          <span>{latest.monthLabel} · {latest.category}</span>
+        <div className="release-feature-media">
+          <img src={latest.image} alt={latest.imageAlt} />
+          <span>本期更新</span>
+        </div>
+        <div className="release-feature-copy">
+          <div>
+            <span>{latest.monthLabel}</span>
+            <small>{latest.category}</small>
+          </div>
           <h3>{latest.title}</h3>
           <p>{latest.summary}</p>
-          <strong>查看本月更新<ArrowRight size={15} /></strong>
+          <strong>查看更新详情<ArrowRight size={15} /></strong>
         </div>
       </article>
 
-      <div className="release-recent-grid">
+      <div className="release-recent-stack">
+        <header>
+          <span>近期上新</span>
+          <small>飞书项目官方</small>
+        </header>
         {recent.map((entry) => (
           <article className={`release-recent-card is-${entry.group}`} key={entry.id}>
             <button type="button" aria-label={`查看${entry.title}`} onClick={() => onOpen?.(entry.id)} />
             <img src={entry.image} alt={entry.imageAlt} />
             <div>
-              <span>{entry.monthLabel} · {entry.category}</span>
+              <span>{entry.monthLabel}</span>
               <h3>{entry.title}</h3>
-              <p>{entry.summary}</p>
-              <ArrowRight size={15} />
+              <footer>
+                <small>{entry.category}</small>
+                <ArrowRight size={15} />
+              </footer>
             </div>
           </article>
         ))}
