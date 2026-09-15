@@ -117,7 +117,9 @@ export function ProductUpdates({
     <section className={`product-updates${compact ? " is-compact" : ""}`} aria-labelledby="product-updates-title">
       <header className="updates-header">
         <div>
+          <span>最近更新</span>
           <h2 id="product-updates-title">产品上新</h2>
+          {compact && <small>{displayedUpdates.length} 次近期发布</small>}
         </div>
         {compact && onBrowseAll ? (
           <button type="button" className="updates-browse-all" onClick={onBrowseAll}>

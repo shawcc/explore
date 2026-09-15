@@ -4,6 +4,8 @@ import {
   Building2,
   CalendarDays,
   Check,
+  ChevronDown,
+  ChevronUp,
   Copy,
   Maximize2,
   Sparkles,
@@ -84,6 +86,7 @@ function PromptTemplateCard({
   copied,
   onCopy,
   onOpen,
+  variant = "",
 }) {
   const promptRef = useRef(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
@@ -108,7 +111,7 @@ function PromptTemplateCard({
   }, [template.prompt]);
 
   return (
-    <article className="assistant-prompt-card">
+    <article className={`assistant-prompt-card${variant ? ` is-${variant}` : ""}`}>
       <div className="assistant-prompt-scene">
         <h3>{template.title}</h3>
         <p>{template.scenario}</p>
@@ -270,12 +273,27 @@ export function DiscoveryEditorial({
 }) {
   const [copiedId, setCopiedId] = useState("");
   const [openTemplate, setOpenTemplate] = useState(null);
+  const [showAllTemplates, setShowAllTemplates] = useState(false);
   const normalizedQuery = query.trim().toLocaleLowerCase("zh-CN");
   const visibleTemplates = aiAssistantOfficialTemplates.filter((entry) => includesQuery(entry, normalizedQuery));
   const practiceFeed = buildPracticeFeed(discoveryEditorialContent)
     .filter((entry) => includesQuery(entry, normalizedQuery))
-    .slice(0, 6);
+    .slice(0, 4);
   const [featuredPractice, ...secondaryPractices] = practiceFeed;
+  const isFilteringTemplates = Boolean(normalizedQuery);
+  const featuredTemplate = visibleTemplates.find(
+    (template) => template.id === "requirement-test-case-design",
+  ) || visibleTemplates[0];
+  const quickTemplates = visibleTemplates
+    .filter((template) => template.id !== featuredTemplate?.id)
+    .slice(0, 3);
+  const previewTemplateIds = new Set([
+    featuredTemplate?.id,
+    ...quickTemplates.map((template) => template.id),
+  ]);
+  const remainingTemplates = visibleTemplates.filter(
+    (template) => !previewTemplateIds.has(template.id),
+  );
 
   const handleCopy = async (template) => {
     await copyText(template.prompt);
@@ -289,22 +307,75 @@ export function DiscoveryEditorial({
       <section className="assistant-task-library" aria-labelledby="assistant-task-library-title">
         <header className="utility-section-heading">
           <div>
+            <span>AI 助手最佳实践</span>
             <h2 id="assistant-task-library-title">Prompt 灵感</h2>
+            <small>{visibleTemplates.length} 个官方模板</small>
           </div>
+          {!isFilteringTemplates && visibleTemplates.length > 4 && (
+            <button
+              type="button"
+              aria-expanded={showAllTemplates}
+              onClick={() => setShowAllTemplates((current) => !current)}
+            >
+              {showAllTemplates ? "收起全部" : `查看全部 ${visibleTemplates.length} 个`}
+              {showAllTemplates ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+            </button>
+          )}
         </header>
 
         {visibleTemplates.length > 0 ? (
-          <div className="assistant-prompt-grid">
-            {visibleTemplates.map((template) => (
-              <PromptTemplateCard
-                template={template}
-                copied={copiedId === template.id}
-                onCopy={handleCopy}
-                onOpen={setOpenTemplate}
-                key={template.id}
-              />
-            ))}
-          </div>
+          isFilteringTemplates ? (
+            <div className="assistant-prompt-archive is-search-result">
+              {visibleTemplates.map((template) => (
+                <PromptTemplateCard
+                  template={template}
+                  copied={copiedId === template.id}
+                  onCopy={handleCopy}
+                  onOpen={setOpenTemplate}
+                  variant="compact"
+                  key={template.id}
+                />
+              ))}
+            </div>
+          ) : (
+            <>
+              <div className="assistant-prompt-editorial">
+                <PromptTemplateCard
+                  template={featuredTemplate}
+                  copied={copiedId === featuredTemplate.id}
+                  onCopy={handleCopy}
+                  onOpen={setOpenTemplate}
+                  variant="featured"
+                />
+                <div className="assistant-prompt-quick-list">
+                  {quickTemplates.map((template) => (
+                    <PromptTemplateCard
+                      template={template}
+                      copied={copiedId === template.id}
+                      onCopy={handleCopy}
+                      onOpen={setOpenTemplate}
+                      variant="compact"
+                      key={template.id}
+                    />
+                  ))}
+                </div>
+              </div>
+              {showAllTemplates && remainingTemplates.length > 0 && (
+                <div className="assistant-prompt-archive">
+                  {remainingTemplates.map((template) => (
+                    <PromptTemplateCard
+                      template={template}
+                      copied={copiedId === template.id}
+                      onCopy={handleCopy}
+                      onOpen={setOpenTemplate}
+                      variant="compact"
+                      key={template.id}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
+          )
         ) : (
           <div className="journal-empty">
             <Sparkles size={20} />
@@ -325,6 +396,7 @@ export function DiscoveryEditorial({
       <section className="ai-practice-section" aria-labelledby="ai-practice-title">
         <header className="utility-section-heading">
           <div>
+            <span>课程 · 案例 · 方法</span>
             <h2 id="ai-practice-title">实践与案例</h2>
           </div>
           <button type="button" onClick={() => onOpenSection("stories")}>

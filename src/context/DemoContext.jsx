@@ -9,7 +9,7 @@ function isPinActive(item) {
 }
 
 export function DemoProvider({ children }) {
-  const [firstVisit, setFirstVisit] = useState(true);
+  const [firstVisit, setFirstVisit] = useState(false);
   const [toast, setToast] = useState(null);
   const [adminItems, setAdminItems] = useState(supplies);
   const [lastDiscoverLocation, setLastDiscoverLocation] = useState("/discover");
