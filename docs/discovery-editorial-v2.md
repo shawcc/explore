@@ -56,3 +56,13 @@ The follow-up pass preserves the information architecture and improves finish qu
 - featured content receives stronger image framing and type hierarchy while secondary content remains compact;
 - mobile prompt cards reflow vertically instead of compressing two columns into the narrow content area;
 - focus rings, reduced-motion behavior, and larger mobile disclosure targets complete the interaction states.
+
+## High-fidelity editorial cover
+
+The Pinterest research identified consistent imagery as the remaining gap between a polished workspace and a recognizable content experience. The high-fidelity pass therefore:
+
+- turns the featured prompt into an official AI Assistant cover using a verified product asset;
+- keeps the scenario and prompt excerpt directly actionable beneath the cover;
+- converts three supporting prompts into one continuous editorial list instead of separate floating cards;
+- removes nested card surfaces and uses typography plus divider rules for structure;
+- preserves all 13 prompts through disclosure and keeps the existing product update and practice data unchanged.

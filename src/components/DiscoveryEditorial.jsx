@@ -112,6 +112,14 @@ function PromptTemplateCard({
 
   return (
     <article className={`assistant-prompt-card${variant ? ` is-${variant}` : ""}`}>
+      {variant === "featured" && (
+        <div className="assistant-prompt-feature-media">
+          <img
+            src="/ai-details/node-ai-assistant-hero.jpg"
+            alt="AI 助手官方应用场景"
+          />
+        </div>
+      )}
       <div className="assistant-prompt-scene">
         <h3>{template.title}</h3>
         <p>{template.scenario}</p>
