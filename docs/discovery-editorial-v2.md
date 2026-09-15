@@ -46,3 +46,13 @@ These references support an information-architecture decision, not visual imitat
 - No horizontal overflow at 1440px and 390px.
 - Production build completes successfully.
 - Keyboard focus and accessible labels remain available for icon actions and disclosure controls.
+
+## Polish pass
+
+The follow-up pass preserves the information architecture and improves finish quality without changing content:
+
+- full-width section bands separate prompts, updates, and practices through material rather than extra navigation;
+- one neutral surface system, one border system, and one shadow scale replace default-looking containers;
+- featured content receives stronger image framing and type hierarchy while secondary content remains compact;
+- mobile prompt cards reflow vertically instead of compressing two columns into the narrow content area;
+- focus rings, reduced-motion behavior, and larger mobile disclosure targets complete the interaction states.
