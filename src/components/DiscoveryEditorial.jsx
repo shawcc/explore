@@ -4,10 +4,10 @@ import {
   Building2,
   CalendarDays,
   Check,
-  ChevronDown,
-  ChevronUp,
   Copy,
   Maximize2,
+  PackageOpen,
+  Puzzle,
   Sparkles,
   X,
 } from "lucide-react";
@@ -15,7 +15,8 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { aiAssistantOfficialTemplates } from "../data/aiOfficialTemplates.js";
 import { discoveryEditorialContent } from "../data/discoveryEditorial.js";
-import { ProductUpdates } from "./ProductUpdates.jsx";
+import { productReleaseUpdates } from "../data/productReleases.js";
+import { SupplyCard } from "./SupplyCard.jsx";
 
 function includesQuery(content, query) {
   if (!query) return true;
@@ -240,6 +241,65 @@ function buildPracticeFeed(content) {
     .filter(Boolean);
 }
 
+function uniqueByBaseId(items) {
+  const seen = new Set();
+
+  return items.filter((item) => {
+    const key = item.baseId || item.id;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function MarketplaceSection({
+  title,
+  count,
+  actionLabel,
+  onAction,
+  children,
+  className = "",
+}) {
+  return (
+    <section className={`marketplace-section${className ? ` ${className}` : ""}`}>
+      <header className="marketplace-section-header">
+        <div>
+          <h2>{title}</h2>
+          {count !== undefined && <span>{count}</span>}
+        </div>
+        <button type="button" onClick={onAction}>
+          {actionLabel || "查看更多"}<ArrowRight size={15} />
+        </button>
+      </header>
+      {children}
+    </section>
+  );
+}
+
+function SkillCard({ template, onOpen }) {
+  return (
+    <article className="marketplace-skill-card">
+      <button
+        type="button"
+        aria-label={`查看${template.title}`}
+        onClick={() => onOpen(template)}
+      />
+      <div className="marketplace-skill-preview" aria-hidden="true">
+        <span><Sparkles size={13} />Agent Skill</span>
+        <p>{template.prompt}</p>
+      </div>
+      <div className="marketplace-skill-copy">
+        <h3>{template.title}</h3>
+        <p>{template.scenario}</p>
+        <footer>
+          <span>{template.subtype === "AI节点" ? "AI 节点" : template.subtype}</span>
+          <ArrowRight size={14} />
+        </footer>
+      </div>
+    </article>
+  );
+}
+
 function PracticeCard({ entry, onOpen, featured = false }) {
   const TypeIcon = entry.kind === "customer"
     ? Building2
@@ -275,32 +335,169 @@ function PracticeCard({ entry, onOpen, featured = false }) {
 }
 
 export function DiscoveryEditorial({
+  items = [],
   query = "",
   onOpenSection,
   onOpenContent,
+  onOpenCatalog,
 }) {
   const [copiedId, setCopiedId] = useState("");
   const [openTemplate, setOpenTemplate] = useState(null);
-  const [showAllTemplates, setShowAllTemplates] = useState(false);
   const normalizedQuery = query.trim().toLocaleLowerCase("zh-CN");
   const visibleTemplates = aiAssistantOfficialTemplates.filter((entry) => includesQuery(entry, normalizedQuery));
   const practiceFeed = buildPracticeFeed(discoveryEditorialContent)
     .filter((entry) => includesQuery(entry, normalizedQuery))
-    .slice(0, 4);
-  const [featuredPractice, ...secondaryPractices] = practiceFeed;
-  const isFilteringTemplates = Boolean(normalizedQuery);
-  const featuredTemplate = visibleTemplates.find(
-    (template) => template.id === "requirement-test-case-design",
-  ) || visibleTemplates[0];
-  const quickTemplates = visibleTemplates
-    .filter((template) => template.id !== featuredTemplate?.id)
     .slice(0, 3);
-  const previewTemplateIds = new Set([
-    featuredTemplate?.id,
-    ...quickTemplates.map((template) => template.id),
-  ]);
-  const remainingTemplates = visibleTemplates.filter(
-    (template) => !previewTemplateIds.has(template.id),
+  const visibleItems = items.filter(
+    (entry) => !entry.isHidden && includesQuery(entry, normalizedQuery),
+  );
+  const templateItems = [
+    ...visibleItems.filter((entry) => entry.type === "solution"),
+    ...visibleItems.filter((entry) => entry.type === "template"),
+  ].slice(0, 4);
+  const aiItems = uniqueByBaseId(
+    visibleItems.filter((entry) => entry.type === "ai"),
+  ).slice(0, 6);
+  const pluginItems = visibleItems
+    .filter((entry) => entry.type === "plugin")
+    .sort((left, right) => (right.usageCount || 0) - (left.usageCount || 0))
+    .slice(0, 6);
+  const featuredUpdate = productReleaseUpdates[0];
+
+  const handleCopy = async (template) => {
+    await copyText(template.prompt);
+    setCopiedId(template.id);
+    window.setTimeout(() => setCopiedId((current) => current === template.id ? "" : current), 1800);
+  };
+
+  return (
+    <>
+      <div className="discovery-marketplace-home">
+        {!normalizedQuery && (
+          <section className="marketplace-promo-grid" aria-label="精选推荐">
+            <article className="marketplace-promo is-primary">
+              <div className="marketplace-promo-copy">
+                <span><Sparkles size={14} />飞书项目 AI</span>
+                <h2>轻应用现已支持 AI 搭建</h2>
+                <p>基于真实项目数据，用自然语言快速搭建业务应用。</p>
+                <button type="button" onClick={() => onOpenCatalog("ai")}>
+                  了解 AI 应用<ArrowRight size={15} />
+                </button>
+              </div>
+              <img src="/product-updates/2026-03-lite-app.webp" alt="飞书项目轻应用产品界面" />
+            </article>
+            <article className="marketplace-promo is-secondary">
+              <button
+                type="button"
+                aria-label={`查看${featuredUpdate.title}`}
+                onClick={() => onOpenContent("updates", featuredUpdate.id)}
+              />
+              <img src={featuredUpdate.image} alt={featuredUpdate.imageAlt} />
+              <div>
+                <span>产品上新</span>
+                <h2>{featuredUpdate.title}</h2>
+                <p>{featuredUpdate.summary}</p>
+              </div>
+            </article>
+          </section>
+        )}
+
+        {templateItems.length > 0 && (
+          <MarketplaceSection
+            title="热门模板"
+            count={`${templateItems.length} 个精选`}
+            onAction={() => onOpenCatalog("template")}
+          >
+            <div className="marketplace-template-grid">
+              {templateItems.map((item) => <SupplyCard item={item} key={item.id} />)}
+            </div>
+          </MarketplaceSection>
+        )}
+
+        {visibleTemplates.length > 0 && (
+          <MarketplaceSection
+            title="热门 Agent Skills"
+            count={`${visibleTemplates.length} 个官方技能`}
+            onAction={() => onOpenSection("skills")}
+          >
+            <div className="marketplace-skill-grid">
+              {visibleTemplates.slice(0, 4).map((template) => (
+                <SkillCard template={template} onOpen={setOpenTemplate} key={template.id} />
+              ))}
+            </div>
+          </MarketplaceSection>
+        )}
+
+        {aiItems.length > 0 && (
+          <MarketplaceSection
+            title="热门 AI 应用"
+            count="覆盖项目关键流程"
+            onAction={() => onOpenCatalog("ai")}
+          >
+            <div className="marketplace-directory-grid is-ai">
+              {aiItems.map((item) => <SupplyCard item={item} key={item.id} />)}
+            </div>
+          </MarketplaceSection>
+        )}
+
+        {pluginItems.length > 0 && (
+          <MarketplaceSection
+            title="热门插件"
+            count="连接项目与外部工具"
+            onAction={() => onOpenCatalog("plugin")}
+          >
+            <div className="marketplace-directory-grid is-plugin">
+              {pluginItems.map((item) => <SupplyCard item={item} key={item.id} />)}
+            </div>
+          </MarketplaceSection>
+        )}
+
+        {practiceFeed.length > 0 && (
+          <MarketplaceSection
+            title="实践与案例"
+            count="课程 · 案例 · 方法"
+            onAction={() => onOpenSection("stories")}
+          >
+            <div className="marketplace-practice-grid">
+              {practiceFeed.map((entry) => (
+                <PracticeCard entry={entry} onOpen={onOpenContent} key={`${entry.kind}-${entry.id}`} />
+              ))}
+            </div>
+          </MarketplaceSection>
+        )}
+
+        {normalizedQuery
+          && templateItems.length === 0
+          && visibleTemplates.length === 0
+          && aiItems.length === 0
+          && pluginItems.length === 0
+          && practiceFeed.length === 0 && (
+          <div className="journal-empty">
+            <PackageOpen size={22} />
+            <strong>没有找到相关资源</strong>
+            <span>可以尝试更短或不同的关键词。</span>
+          </div>
+        )}
+      </div>
+      {openTemplate && createPortal(
+        <PromptDialog
+          template={openTemplate}
+          copied={copiedId === openTemplate.id}
+          onClose={() => setOpenTemplate(null)}
+          onCopy={handleCopy}
+        />,
+        document.body,
+      )}
+    </>
+  );
+}
+
+export function AgentSkillsCatalog({ query = "" }) {
+  const [copiedId, setCopiedId] = useState("");
+  const [openTemplate, setOpenTemplate] = useState(null);
+  const normalizedQuery = query.trim().toLocaleLowerCase("zh-CN");
+  const visibleTemplates = aiAssistantOfficialTemplates.filter(
+    (entry) => includesQuery(entry, normalizedQuery),
   );
 
   const handleCopy = async (template) => {
@@ -311,123 +508,35 @@ export function DiscoveryEditorial({
 
   return (
     <>
-      <div className="discovery-journal is-utility-led">
-      <section className="assistant-task-library" aria-labelledby="assistant-task-library-title">
-        <header className="utility-section-heading">
+      <section className="agent-skills-catalog" aria-labelledby="agent-skills-title">
+        <header>
           <div>
-            <span>AI 助手最佳实践</span>
-            <h2 id="assistant-task-library-title">Prompt 灵感</h2>
-            <small>{visibleTemplates.length} 个官方模板</small>
+            <span><Puzzle size={15} />官方能力库</span>
+            <h2 id="agent-skills-title">Agent Skills</h2>
+            <p>把成熟的项目工作方法直接交给 AI 助手执行。</p>
           </div>
-          {!isFilteringTemplates && visibleTemplates.length > 4 && (
-            <button
-              type="button"
-              aria-expanded={showAllTemplates}
-              onClick={() => setShowAllTemplates((current) => !current)}
-            >
-              {showAllTemplates ? "收起全部" : `查看全部 ${visibleTemplates.length} 个`}
-              {showAllTemplates ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
-            </button>
-          )}
+          <strong>{visibleTemplates.length} 个技能</strong>
         </header>
-
         {visibleTemplates.length > 0 ? (
-          isFilteringTemplates ? (
-            <div className="assistant-prompt-archive is-search-result">
-              {visibleTemplates.map((template) => (
-                <PromptTemplateCard
-                  template={template}
-                  copied={copiedId === template.id}
-                  onCopy={handleCopy}
-                  onOpen={setOpenTemplate}
-                  variant="compact"
-                  key={template.id}
-                />
-              ))}
-            </div>
-          ) : (
-            <>
-              <div className="assistant-prompt-editorial">
-                <PromptTemplateCard
-                  template={featuredTemplate}
-                  copied={copiedId === featuredTemplate.id}
-                  onCopy={handleCopy}
-                  onOpen={setOpenTemplate}
-                  variant="featured"
-                />
-                <div className="assistant-prompt-quick-list">
-                  {quickTemplates.map((template) => (
-                    <PromptTemplateCard
-                      template={template}
-                      copied={copiedId === template.id}
-                      onCopy={handleCopy}
-                      onOpen={setOpenTemplate}
-                      variant="compact"
-                      key={template.id}
-                    />
-                  ))}
-                </div>
-              </div>
-              {showAllTemplates && remainingTemplates.length > 0 && (
-                <div className="assistant-prompt-archive">
-                  {remainingTemplates.map((template) => (
-                    <PromptTemplateCard
-                      template={template}
-                      copied={copiedId === template.id}
-                      onCopy={handleCopy}
-                      onOpen={setOpenTemplate}
-                      variant="compact"
-                      key={template.id}
-                    />
-                  ))}
-                </div>
-              )}
-            </>
-          )
+          <div className="agent-skills-grid">
+            {visibleTemplates.map((template) => (
+              <PromptTemplateCard
+                template={template}
+                copied={copiedId === template.id}
+                onCopy={handleCopy}
+                onOpen={setOpenTemplate}
+                variant="compact"
+                key={template.id}
+              />
+            ))}
+          </div>
         ) : (
           <div className="journal-empty">
             <Sparkles size={20} />
-            <strong>没有匹配的 Prompt</strong>
+            <strong>没有匹配的 Agent Skill</strong>
           </div>
         )}
       </section>
-
-      <div id="product-updates">
-        <ProductUpdates
-          query={query}
-          compact
-          onBrowseAll={() => onOpenSection("updates")}
-          onOpenUpdate={(item) => onOpenContent("updates", item)}
-        />
-      </div>
-
-      <section className="ai-practice-section" aria-labelledby="ai-practice-title">
-        <header className="utility-section-heading">
-          <div>
-            <span>课程 · 案例 · 方法</span>
-            <h2 id="ai-practice-title">实践与案例</h2>
-          </div>
-          <button type="button" onClick={() => onOpenSection("stories")}>
-            查看全部<ArrowRight size={15} />
-          </button>
-        </header>
-        {practiceFeed.length > 0 ? (
-          <div className="ai-practice-showcase">
-            <PracticeCard entry={featuredPractice} onOpen={onOpenContent} featured />
-            <div className="ai-practice-grid">
-              {secondaryPractices.map((entry) => (
-                <PracticeCard entry={entry} onOpen={onOpenContent} key={`${entry.kind}-${entry.id}`} />
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="journal-empty">
-            <BookOpenText size={20} />
-            <strong>没有匹配的实践内容</strong>
-          </div>
-        )}
-      </section>
-      </div>
       {openTemplate && createPortal(
         <PromptDialog
           template={openTemplate}

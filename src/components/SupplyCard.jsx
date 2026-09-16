@@ -94,8 +94,16 @@ export function SupplyCard({ item, searchMatchDetail = "" }) {
         <Cover item={item} />
       </div>
       <div className="card-content">
-        {!isApp && <h3>{item.name}</h3>}
+        <h3 className={isApp ? "app-card-title" : ""}>{item.name}</h3>
         <p className="card-summary">{item.summary}</p>
+        {isApp && (
+          <div className="card-directory-meta">
+            <span>{item.provider || item.developer}</span>
+            {item.type === "plugin" && item.usageCount > 0 && (
+              <small>{item.usageCount.toLocaleString("zh-CN")} 次使用</small>
+            )}
+          </div>
+        )}
         {searchMatchDetail && (
           <p className="search-match-detail">
             <span>匹配详情</span>

@@ -66,6 +66,7 @@ const discoverTabs = [
 const exploreTabs = [
   { id: "discover", label: "发现" },
   { id: "ai", label: "AI 应用", icon: "ai" },
+  { id: "skills", label: "Agent Skills" },
   { id: "plugin", label: "插件", icon: "plugin" },
   { id: "template", label: "模板", icon: "template" },
 ];
@@ -244,14 +245,18 @@ export function DiscoverPage() {
     ? "scenarios"
     : initialType === "updates"
       ? "updates"
-      : ["home", "stories", "courses", "practices", "customers", "updates", "catalog", "scenarios"].includes(requestedExploreSection)
+      : ["home", "stories", "courses", "practices", "customers", "updates", "catalog", "scenarios", "skills"].includes(requestedExploreSection)
         ? requestedExploreSection
         : "home";
   const exploreContentId = searchParams.get("item") || "";
   const exploreCatalog = ["ai", "plugin", "template"].includes(searchParams.get("catalog"))
     ? searchParams.get("catalog")
     : "ai";
-  const activeExploreTab = exploreSection === "catalog" ? exploreCatalog : "discover";
+  const activeExploreTab = exploreSection === "catalog"
+    ? exploreCatalog
+    : exploreSection === "skills"
+      ? "skills"
+      : "discover";
   const [activeTab, setActiveTab] = useState(
     initialType === "solution" || initialType === "template"
       ? "template"
@@ -471,6 +476,8 @@ export function DiscoverPage() {
                 onClick={() => (
                   tab.id === "discover"
                     ? selectExploreRoute({ section: "home" })
+                    : tab.id === "skills"
+                      ? selectExploreRoute({ section: "skills" })
                     : selectExploreRoute({ section: "catalog", catalog: tab.id })
                 )}
               >

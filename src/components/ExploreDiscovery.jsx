@@ -1,6 +1,6 @@
 import { ArrowLeft } from "lucide-react";
 import { AiScenarioWorkspace } from "./AiScenarioWorkspace.jsx";
-import { DiscoveryEditorial } from "./DiscoveryEditorial.jsx";
+import { AgentSkillsCatalog, DiscoveryEditorial } from "./DiscoveryEditorial.jsx";
 import { ExploreCatalog, ExploreContentHub } from "./ExploreContentHub.jsx";
 
 const contentSections = ["stories", "courses", "practices", "customers", "updates"];
@@ -23,7 +23,12 @@ export function ExploreDiscovery({
           query={query}
           onOpenSection={(nextSection) => onNavigate({ section: nextSection })}
           onOpenContent={(nextSection, item) => onNavigate({ section: nextSection, item })}
+          onOpenCatalog={(nextCatalog) => onNavigate({ section: "catalog", catalog: nextCatalog })}
         />
+      )}
+
+      {section === "skills" && (
+        <AgentSkillsCatalog query={query} />
       )}
 
       {contentSections.includes(section) && (
