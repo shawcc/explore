@@ -1,0 +1,32 @@
+:root {
+  --meego-background: #f6f8fb;
+  --meego-foreground: #16202f;
+  --meego-card: #ffffff;
+  --meego-card-foreground: #16202f;
+  --meego-popover: #ffffff;
+  --meego-popover-foreground: #16202f;
+  --meego-primary: #0f766e;
+  --meego-primary-foreground: #ffffff;
+  --meego-muted: #eef3f6;
+  --meego-muted-foreground: #667386;
+  --meego-border: #dce5ea;
+  --meego-input: #dce5ea;
+  --meego-ring: #0f766e;
+  --meego-line: #dce5ea;
+  --meego-surface: #ffffff;
+  --meego-surface-2: #edf4f3;
+  --meego-ink: #16202f;
+  --meego-ink-2: #667386;
+  --meego-ink-3: #94a3b3;
+  --meego-brand: #0f766e;
+  --meego-brand-ink: #ffffff;
+  --meego-state-success: #16855f;
+  --meego-state-warning: #a66114;
+  --meego-state-error: #b42318;
+  --meego-state-info: #256f8d;
+  --meego-radius-sm: 4px;
+  --meego-radius-md: 8px;
+  --meego-radius-lg: 16px;
+  --meego-radius-xl: 16px;
+  --radius: 8px;
+}

@@ -1,0 +1,135 @@
+{
+  "data": [
+    {
+      "id": "page-discover-redesign",
+      "title": "发现页改版",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1789443380541,
+      "canvasData": {
+        "x": 0,
+        "y": 0,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 2032,
+          "viewportWidth": 1440,
+          "sourceHash": "fnv1a-7e225216",
+          "measuredAt": 1789456316788
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/discover-redesign.html",
+        "interactions": [
+          {
+            "domId": "search-discover",
+            "targetPageId": "page-discover-redesign",
+            "hideEdge": true,
+            "transitionLabel": "搜索"
+          },
+          {
+            "domId": "open-ai",
+            "targetPageId": "page-discover-redesign",
+            "hideEdge": true,
+            "transitionLabel": "打开 AI 应用"
+          },
+          {
+            "domId": "open-template",
+            "targetPageId": "page-discover-redesign",
+            "hideEdge": true,
+            "transitionLabel": "查看模板"
+          },
+          {
+            "domId": "copy-prompt",
+            "targetPageId": "page-discover-redesign",
+            "hideEdge": true,
+            "transitionLabel": "复制 Prompt"
+          },
+          {
+            "domId": "view-update",
+            "targetPageId": "page-discover-redesign",
+            "hideEdge": true,
+            "transitionLabel": "查看更新"
+          }
+        ]
+      }
+    },
+    {
+      "id": "image-001",
+      "title": "AI 研修班主视觉",
+      "type": "image",
+      "version": 1,
+      "createdAt": 1789443380541,
+      "canvasData": {
+        "x": 0,
+        "y": 373,
+        "naturalSize": {
+          "width": 1600,
+          "height": 900
+        }
+      },
+      "devMetadata": {
+        "imageSrc": "assets/ai-workshop-hero.jpg"
+      }
+    },
+    {
+      "id": "image-002",
+      "title": "AI 助手产品更新",
+      "type": "image",
+      "version": 1,
+      "createdAt": 1789443380541,
+      "canvasData": {
+        "x": 480,
+        "y": 373,
+        "naturalSize": {
+          "width": 1800,
+          "height": 1101
+        }
+      },
+      "devMetadata": {
+        "imageSrc": "assets/2026-08-ai-assistant.webp"
+      }
+    },
+    {
+      "id": "image-003",
+      "title": "智能体连接器展示",
+      "type": "image",
+      "version": 1,
+      "createdAt": 1789443380541,
+      "canvasData": {
+        "x": 960,
+        "y": 373,
+        "naturalSize": {
+          "width": 1280,
+          "height": 642
+        }
+      },
+      "devMetadata": {
+        "imageSrc": "assets/node-agent-connector-hero.jpg"
+      }
+    },
+    {
+      "id": "image-004",
+      "title": "AI 节点运行界面",
+      "type": "image",
+      "version": 1,
+      "createdAt": 1789443380541,
+      "canvasData": {
+        "x": 1440,
+        "y": 373,
+        "naturalSize": {
+          "width": 690,
+          "height": 316
+        }
+      },
+      "devMetadata": {
+        "imageSrc": "assets/run-ai-app.png"
+      }
+    }
+  ],
+  "config": {
+    "autoLayout": true,
+    "deviceType": "desktop",
+    "projectName": "发现页改版"
+  }
+}

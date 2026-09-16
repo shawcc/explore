@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preflight</title>
+    <style id="theme-vars">
+:root {
+  --meego-background: #f6f8fb;
+  --meego-foreground: #16202f;
+  --meego-card: #ffffff;
+  --meego-card-foreground: #16202f;
+  --meego-popover: #ffffff;
+  --meego-popover-foreground: #16202f;
+  --meego-primary: #0f766e;
+  --meego-primary-foreground: #ffffff;
+  --meego-muted: #eef3f6;
+  --meego-muted-foreground: #667386;
+  --meego-border: #dce5ea;
+  --meego-input: #dce5ea;
+  --meego-ring: #0f766e;
+  --meego-line: #dce5ea;
+  --meego-surface: #ffffff;
+  --meego-surface-2: #edf4f3;
+  --meego-ink: #16202f;
+  --meego-ink-2: #667386;
+  --meego-ink-3: #94a3b3;
+  --meego-brand: #0f766e;
+  --meego-brand-ink: #ffffff;
+  --meego-state-success: #16855f;
+  --meego-state-warning: #a66114;
+  --meego-state-error: #b42318;
+  --meego-state-info: #256f8d;
+  --meego-radius-sm: 4px;
+  --meego-radius-md: 8px;
+  --meego-radius-lg: 16px;
+  --meego-radius-xl: 16px;
+  --radius: 8px;
+}
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-background: var(--meego-background);
+    --color-foreground: var(--meego-foreground);
+    --color-card: var(--meego-card);
+    --color-card-foreground: var(--meego-card-foreground);
+    --color-popover: var(--meego-popover);
+    --color-popover-foreground: var(--meego-popover-foreground);
+    --color-primary: var(--meego-primary);
+    --color-primary-foreground: var(--meego-primary-foreground);
+    --color-muted: var(--meego-muted);
+    --color-muted-foreground: var(--meego-muted-foreground);
+    --color-border: var(--meego-border);
+    --color-input: var(--meego-input);
+    --color-ring: var(--meego-ring);
+    --radius-sm: var(--meego-radius-sm);
+    --radius-md: var(--meego-radius-md);
+    --radius-lg: var(--meego-radius-lg);
+    --radius-xl: var(--meego-radius-xl);
+  }
+  @layer base {
+    body { background: var(--meego-background); color: var(--meego-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style id="semantic-token-fallback">
+      .bg-background { background-color: var(--meego-background); }
+      .text-background { color: var(--meego-background); }
+      .border-background { border-color: var(--meego-background); }
+      .ring-background { --tw-ring-color: var(--meego-background); }
+      .bg-foreground { background-color: var(--meego-foreground); }
+      .text-foreground { color: var(--meego-foreground); }
+      .border-foreground { border-color: var(--meego-foreground); }
+      .ring-foreground { --tw-ring-color: var(--meego-foreground); }
+      .bg-card { background-color: var(--meego-card); }
+      .text-card { color: var(--meego-card); }
+      .border-card { border-color: var(--meego-card); }
+      .ring-card { --tw-ring-color: var(--meego-card); }
+      .bg-card-foreground { background-color: var(--meego-card-foreground); }
+      .text-card-foreground { color: var(--meego-card-foreground); }
+      .border-card-foreground { border-color: var(--meego-card-foreground); }
+      .ring-card-foreground { --tw-ring-color: var(--meego-card-foreground); }
+      .bg-popover { background-color: var(--meego-popover); }
+      .text-popover { color: var(--meego-popover); }
+      .border-popover { border-color: var(--meego-popover); }
+      .ring-popover { --tw-ring-color: var(--meego-popover); }
+      .bg-popover-foreground { background-color: var(--meego-popover-foreground); }
+      .text-popover-foreground { color: var(--meego-popover-foreground); }
+      .border-popover-foreground { border-color: var(--meego-popover-foreground); }
+      .ring-popover-foreground { --tw-ring-color: var(--meego-popover-foreground); }
+      .bg-primary { background-color: var(--meego-primary); }
+      .text-primary { color: var(--meego-primary); }
+      .border-primary { border-color: var(--meego-primary); }
+      .ring-primary { --tw-ring-color: var(--meego-primary); }
+      .bg-primary-foreground { background-color: var(--meego-primary-foreground); }
+      .text-primary-foreground { color: var(--meego-primary-foreground); }
+      .border-primary-foreground { border-color: var(--meego-primary-foreground); }
+      .ring-primary-foreground { --tw-ring-color: var(--meego-primary-foreground); }
+      .bg-muted { background-color: var(--meego-muted); }
+      .text-muted { color: var(--meego-muted); }
+      .border-muted { border-color: var(--meego-muted); }
+      .ring-muted { --tw-ring-color: var(--meego-muted); }
+      .bg-muted-foreground { background-color: var(--meego-muted-foreground); }
+      .text-muted-foreground { color: var(--meego-muted-foreground); }
+      .border-muted-foreground { border-color: var(--meego-muted-foreground); }
+      .ring-muted-foreground { --tw-ring-color: var(--meego-muted-foreground); }
+      .bg-border { background-color: var(--meego-border); }
+      .text-border { color: var(--meego-border); }
+      .border-border { border-color: var(--meego-border); }
+      .ring-border { --tw-ring-color: var(--meego-border); }
+      .bg-input { background-color: var(--meego-input); }
+      .text-input { color: var(--meego-input); }
+      .border-input { border-color: var(--meego-input); }
+      .ring-input { --tw-ring-color: var(--meego-input); }
+      .bg-ring { background-color: var(--meego-ring); }
+      .text-ring { color: var(--meego-ring); }
+      .border-ring { border-color: var(--meego-ring); }
+      .ring-ring { --tw-ring-color: var(--meego-ring); }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+    </style>
+</head>
+<body class="min-h-screen font-sans antialiased">
+    <main>
+    </main>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

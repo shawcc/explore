@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>发现页改版</title>
+    <style id="theme-vars">
+:root {
+  --meego-background: #f6f8fb;
+  --meego-foreground: #16202f;
+  --meego-card: #ffffff;
+  --meego-card-foreground: #16202f;
+  --meego-popover: #ffffff;
+  --meego-popover-foreground: #16202f;
+  --meego-primary: #0f766e;
+  --meego-primary-foreground: #ffffff;
+  --meego-muted: #eef3f6;
+  --meego-muted-foreground: #667386;
+  --meego-border: #dce5ea;
+  --meego-input: #dce5ea;
+  --meego-ring: #0f766e;
+  --meego-line: #dce5ea;
+  --meego-surface: #ffffff;
+  --meego-surface-2: #edf4f3;
+  --meego-ink: #16202f;
+  --meego-ink-2: #667386;
+  --meego-ink-3: #94a3b3;
+  --meego-brand: #0f766e;
+  --meego-brand-ink: #ffffff;
+  --meego-state-success: #16855f;
+  --meego-state-warning: #a66114;
+  --meego-state-error: #b42318;
+  --meego-state-info: #256f8d;
+  --meego-radius-sm: 4px;
+  --meego-radius-md: 8px;
+  --meego-radius-lg: 16px;
+  --meego-radius-xl: 16px;
+  --radius: 8px;
+}
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-background: var(--meego-background);
+    --color-foreground: var(--meego-foreground);
+    --color-card: var(--meego-card);
+    --color-card-foreground: var(--meego-card-foreground);
+    --color-popover: var(--meego-popover);
+    --color-popover-foreground: var(--meego-popover-foreground);
+    --color-primary: var(--meego-primary);
+    --color-primary-foreground: var(--meego-primary-foreground);
+    --color-muted: var(--meego-muted);
+    --color-muted-foreground: var(--meego-muted-foreground);
+    --color-border: var(--meego-border);
+    --color-input: var(--meego-input);
+    --color-ring: var(--meego-ring);
+    --radius-sm: var(--meego-radius-sm);
+    --radius-md: var(--meego-radius-md);
+    --radius-lg: var(--meego-radius-lg);
+    --radius-xl: var(--meego-radius-xl);
+  }
+  @layer base {
+    body { background: var(--meego-background); color: var(--meego-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style id="semantic-token-fallback">
+      .bg-background { background-color: var(--meego-background); }
+      .text-background { color: var(--meego-background); }
+      .border-background { border-color: var(--meego-background); }
+      .ring-background { --tw-ring-color: var(--meego-background); }
+      .bg-foreground { background-color: var(--meego-foreground); }
+      .text-foreground { color: var(--meego-foreground); }
+      .border-foreground { border-color: var(--meego-foreground); }
+      .ring-foreground { --tw-ring-color: var(--meego-foreground); }
+      .bg-card { background-color: var(--meego-card); }
+      .text-card { color: var(--meego-card); }
+      .border-card { border-color: var(--meego-card); }
+      .ring-card { --tw-ring-color: var(--meego-card); }
+      .bg-card-foreground { background-color: var(--meego-card-foreground); }
+      .text-card-foreground { color: var(--meego-card-foreground); }
+      .border-card-foreground { border-color: var(--meego-card-foreground); }
+      .ring-card-foreground { --tw-ring-color: var(--meego-card-foreground); }
+      .bg-popover { background-color: var(--meego-popover); }
+      .text-popover { color: var(--meego-popover); }
+      .border-popover { border-color: var(--meego-popover); }
+      .ring-popover { --tw-ring-color: var(--meego-popover); }
+      .bg-popover-foreground { background-color: var(--meego-popover-foreground); }
+      .text-popover-foreground { color: var(--meego-popover-foreground); }
+      .border-popover-foreground { border-color: var(--meego-popover-foreground); }
+      .ring-popover-foreground { --tw-ring-color: var(--meego-popover-foreground); }
+      .bg-primary { background-color: var(--meego-primary); }
+      .text-primary { color: var(--meego-primary); }
+      .border-primary { border-color: var(--meego-primary); }
+      .ring-primary { --tw-ring-color: var(--meego-primary); }
+      .bg-primary-foreground { background-color: var(--meego-primary-foreground); }
+      .text-primary-foreground { color: var(--meego-primary-foreground); }
+      .border-primary-foreground { border-color: var(--meego-primary-foreground); }
+      .ring-primary-foreground { --tw-ring-color: var(--meego-primary-foreground); }
+      .bg-muted { background-color: var(--meego-muted); }
+      .text-muted { color: var(--meego-muted); }
+      .border-muted { border-color: var(--meego-muted); }
+      .ring-muted { --tw-ring-color: var(--meego-muted); }
+      .bg-muted-foreground { background-color: var(--meego-muted-foreground); }
+      .text-muted-foreground { color: var(--meego-muted-foreground); }
+      .border-muted-foreground { border-color: var(--meego-muted-foreground); }
+      .ring-muted-foreground { --tw-ring-color: var(--meego-muted-foreground); }
+      .bg-border { background-color: var(--meego-border); }
+      .text-border { color: var(--meego-border); }
+      .border-border { border-color: var(--meego-border); }
+      .ring-border { --tw-ring-color: var(--meego-border); }
+      .bg-input { background-color: var(--meego-input); }
+      .text-input { color: var(--meego-input); }
+      .border-input { border-color: var(--meego-input); }
+      .ring-input { --tw-ring-color: var(--meego-input); }
+      .bg-ring { background-color: var(--meego-ring); }
+      .text-ring { color: var(--meego-ring); }
+      .border-ring { border-color: var(--meego-ring); }
+      .ring-ring { --tw-ring-color: var(--meego-ring); }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+    </style>
+</head>
+<body class="min-h-screen font-sans antialiased">
+    <main class="meego-shell" aria-label="发现页改版">
+        <aside class="side-nav" aria-label="左侧一级导航">
+            <a class="brand" href="#" aria-label="Meego 发现中心">
+                <span class="brand-mark"><i data-lucide="sparkles"></i></span>
+                <span>
+                    <strong>Meego</strong>
+                    <small>发现中心</small>
+                </span>
+            </a>
+            <nav class="primary-nav" aria-label="主导航">
+                <a class="nav-item active" href="#"><i data-lucide="compass"></i><span>发现</span></a>
+                <a class="nav-item" href="#"><i data-lucide="bot"></i><span>AI 应用</span></a>
+                <a class="nav-item" href="#"><i data-lucide="plug"></i><span>插件</span></a>
+                <a class="nav-item" href="#"><i data-lucide="layout-template"></i><span>模板</span></a>
+                <a class="nav-item" href="#"><i data-lucide="book-open-text"></i><span>实践案例</span></a>
+            </nav>
+            <div class="nav-note">
+                <i data-lucide="shield-check"></i>
+                <p>以精选内容替代等权重堆叠，让搜索、分类与行动入口各司其职。</p>
+            </div>
+        </aside>
+
+        <section class="content-stage">
+            <header class="topbar">
+                <div>
+                    <p class="eyebrow">企业级产品发现中心</p>
+                    <h1>发现页改版</h1>
+                </div>
+                <form class="search-box" role="search">
+                    <i data-lucide="search"></i>
+                    <input id="search-discover" data-dom-id="search-discover" type="search" aria-label="搜索 AI 应用、插件、模板和实践案例" placeholder="搜索 AI 应用、插件、模板和实践案例" />
+                    <button type="submit">搜索</button>
+                </form>
+            </header>
+
+            <section class="hero-card" aria-labelledby="hero-title">
+                <div class="hero-copy">
+                    <span class="section-label">新版信息架构</span>
+                    <h2 id="hero-title">把“发现”从素材列表升级为可行动的工作台</h2>
+                    <p>首屏聚焦价值判断、搜索入口与三个高价值动作；Prompt 灵感只露出摘要和适用场景，更多细节在用户明确点击后展开。</p>
+                    <div class="hero-actions" aria-label="高价值入口">
+                        <a id="open-ai" data-dom-id="open-ai" class="action-pill primary" href="#"><i data-lucide="rocket"></i><span>打开 AI 应用</span></a>
+                        <a id="open-template" data-dom-id="open-template" class="action-pill" href="#"><i data-lucide="panels-top-left"></i><span>查看模板</span></a>
+                        <a class="action-pill" href="#design-opinion"><i data-lucide="clipboard-check"></i><span>查看设计意见</span></a>
+                    </div>
+                </div>
+                <figure class="hero-visual">
+                    <img src="../assets/ai-workshop-hero.jpg" alt="AI 研修班与工作流实践场景" />
+                    <figcaption>精选专题、上新和案例在同一屏建立主次关系。</figcaption>
+                </figure>
+            </section>
+
+            <section id="design-opinion" class="opinion-card" aria-labelledby="opinion-title">
+                <div class="section-heading">
+                    <span class="section-label">设计诊断</span>
+                    <h2 id="opinion-title">五条改版意见</h2>
+                </div>
+                <div class="opinion-grid">
+                    <article><span>01</span><h3>降低 Prompt 长文本权重</h3><p>首屏只展示目标、适用对象和复制动作，长代码块延后到详情或展开层。</p></article>
+                    <article><span>02</span><h3>搜索回到任务入口</h3><p>搜索框放入顶部工具区，提示用户可跨 AI 应用、插件、模板与案例检索。</p></article>
+                    <article><span>03</span><h3>分类导航保持稳定</h3><p>保留发现、AI 应用、插件、模板四类，视觉上把当前页与次级入口区分清楚。</p></article>
+                    <article><span>04</span><h3>右侧承接趋势更新</h3><p>将原本空白区域改为版本上新、热门实践和运营推荐，形成持续浏览理由。</p></article>
+                    <article><span>05</span><h3>行动入口集中呈现</h3><p>把打开应用、查看模板、复制 Prompt 等高频动作统一为按钮层级，减少分散跳转。</p></article>
+                </div>
+            </section>
+
+            <section id="redesign-preview" class="preview-layout" aria-labelledby="preview-title">
+                <div class="preview-main">
+                    <div class="section-heading split">
+                        <div>
+                            <span class="section-label">改版预览</span>
+                            <h2 id="preview-title">精选内容主区</h2>
+                        </div>
+                        <div class="tabs" aria-label="二级导航">
+                            <a class="tab active" href="#">发现</a>
+                            <a class="tab" href="#">AI 应用</a>
+                            <a class="tab" href="#">插件</a>
+                            <a class="tab" href="#">模板</a>
+                        </div>
+                    </div>
+
+                    <article class="featured-card">
+                        <img src="../assets/node-agent-connector-hero.jpg" alt="智能体连接器能力展示" />
+                        <div>
+                            <span class="content-kicker">本周精选</span>
+                            <h3>用智能体连接器把需求、执行与复盘串成闭环</h3>
+                            <p>面向产品、研发与运营团队，把常用 MCP、模板和 Prompt 编排为可复用的任务流。</p>
+                            <div class="meta-row"><span>适合：跨团队协作</span><span>预计 12 分钟上手</span></div>
+                        </div>
+                    </article>
+
+                    <div class="prompt-panel" aria-labelledby="prompt-title">
+                        <div class="section-heading compact">
+                            <span class="section-label">Prompt 灵感</span>
+                            <h2 id="prompt-title">缩略卡片，不在首屏铺长代码</h2>
+                        </div>
+                        <div class="prompt-grid">
+                            <article class="prompt-card">
+                                <i data-lucide="scan-search"></i>
+                                <h3>需求澄清助手</h3>
+                                <p>把零散描述整理为目标、边界、风险与验收标准。</p>
+                                <button id="copy-prompt" data-dom-id="copy-prompt" type="button">复制摘要 Prompt</button>
+                            </article>
+                            <article class="prompt-card">
+                                <i data-lucide="workflow"></i>
+                                <h3>流程诊断顾问</h3>
+                                <p>识别流程中的等待、重复录入和职责不清问题。</p>
+                                <button type="button">查看详情</button>
+                            </article>
+                            <article class="prompt-card">
+                                <i data-lucide="chart-no-axes-combined"></i>
+                                <h3>数据解读提纲</h3>
+                                <p>快速生成指标口径、异常解释和下一步验证假设。</p>
+                                <button type="button">加入收藏</button>
+                            </article>
+                        </div>
+                    </div>
+
+                    <div class="story-grid">
+                        <article class="update-card">
+                            <img src="../assets/2026-08-ai-assistant.webp" alt="AI 助手产品更新界面" />
+                            <div>
+                                <span class="content-kicker">产品上新</span>
+                                <h3>AI 助手新增多步骤任务建议</h3>
+                                <p>面向复杂业务场景，提供上下文继承、行动校验和结果回看能力。</p>
+                                <a id="view-update" data-dom-id="view-update" href="#">查看更新</a>
+                            </div>
+                        </article>
+                        <article class="update-card">
+                            <img src="../assets/run-ai-app.png" alt="AI 节点运行界面" />
+                            <div>
+                                <span class="content-kicker">实践与案例</span>
+                                <h3>从节点运行到团队复用</h3>
+                                <p>展示如何把一次 AI 节点执行沉淀为模板，并接入日常项目节奏。</p>
+                                <a href="#">阅读案例</a>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+
+                <aside class="trend-panel" aria-label="右侧趋势更新">
+                    <div class="trend-card">
+                        <div class="trend-head">
+                            <span class="section-label">趋势更新</span>
+                            <i data-lucide="activity"></i>
+                        </div>
+                        <ol class="trend-list">
+                            <li><span>今日热门</span><strong>AI 应用编排模板</strong><small>被 286 个团队查看</small></li>
+                            <li><span>上新提醒</span><strong>MCP 插件连接器</strong><small>新增权限说明与实践案例</small></li>
+                            <li><span>编辑推荐</span><strong>产品需求拆解 Prompt</strong><small>适合评审前快速补齐边界</small></li>
+                        </ol>
+                    </div>
+                    <div class="trend-card subtle">
+                        <h3>新版右侧面板承担什么</h3>
+                        <p>不再空置，也不塞满广告；只展示与当前发现任务相关的更新、热门和推荐。</p>
+                    </div>
+                </aside>
+            </section>
+        </section>
+    </main>
+
+    <style id="critical-layout">
+        :root {
+            --page-bg: var(--meego-background);
+            --page-surface: var(--meego-card);
+            --page-surface-soft: var(--meego-surface-2);
+            --page-text: var(--meego-foreground);
+            --page-text-muted: var(--meego-muted-foreground);
+            --page-line: var(--meego-border);
+            --page-action: var(--meego-primary);
+            --page-action-text: var(--meego-primary-foreground);
+            --page-radius: var(--meego-radius-lg);
+            --page-shadow: 0 18px 60px color-mix(in srgb, var(--meego-foreground) 10%, transparent);
+        }
+
+        * { box-sizing: border-box; }
+        html { overflow-x: hidden; }
+        body { margin: 0; min-width: 0; overflow-x: hidden; background: var(--page-bg); color: var(--page-text); }
+        a { color: inherit; text-decoration: none; }
+        button, input { font: inherit; }
+        img { display: block; max-width: 100%; }
+
+        .meego-shell {
+            width: 100%;
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 248px minmax(0, 1fr);
+            gap: 24px;
+            padding: 24px;
+        }
+
+        .side-nav {
+            position: sticky;
+            top: 24px;
+            align-self: start;
+            height: calc(100vh - 48px);
+            display: flex;
+            flex-direction: column;
+            padding: 18px;
+            border: 1px solid var(--page-line);
+            border-radius: var(--page-radius);
+            background: color-mix(in srgb, var(--page-surface) 92%, var(--page-surface-soft));
+            box-shadow: 0 10px 30px color-mix(in srgb, var(--meego-foreground) 6%, transparent);
+        }
+
+        .content-stage { min-width: 0; display: grid; gap: 18px; }
+        .topbar, .hero-card, .opinion-card, .preview-layout {
+            border: 1px solid var(--page-line);
+            border-radius: calc(var(--page-radius) + 6px);
+            background: var(--page-surface);
+            box-shadow: 0 12px 40px color-mix(in srgb, var(--meego-foreground) 5%, transparent);
+        }
+
+        .topbar {
+            display: grid;
+            grid-template-columns: minmax(220px, 1fr) minmax(320px, 560px);
+            gap: 18px;
+            align-items: center;
+            padding: 18px 20px;
+        }
+
+        .hero-card {
+            display: grid;
+            grid-template-columns: minmax(0, 1.08fr) minmax(320px, .92fr);
+            gap: 22px;
+            padding: 24px;
+            overflow: hidden;
+        }
+
+        .preview-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 320px;
+            gap: 18px;
+            padding: 18px;
+            align-items: start;
+        }
+
+        @media (max-width: 1024px) {
+            .meego-shell { grid-template-columns: 220px minmax(0, 1fr); gap: 16px; padding: 16px; }
+            .topbar, .hero-card, .preview-layout { grid-template-columns: 1fr; }
+            .trend-panel { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+        }
+
+        @media (max-width: 720px) {
+            .meego-shell { display: block; padding: 12px; }
+            .side-nav { display: none; }
+            .content-stage { gap: 12px; }
+            .topbar, .hero-card, .opinion-card, .preview-layout { border-radius: 18px; }
+            .trend-panel, .opinion-grid, .prompt-grid, .story-grid { grid-template-columns: 1fr; }
+            .hero-actions, .tabs { overflow-x: auto; padding-bottom: 4px; }
+            .search-box { grid-template-columns: 22px minmax(0, 1fr); }
+            .search-box button { grid-column: 1 / -1; width: 100%; }
+        }
+    </style>
+
+    <style id="page-styles">
+        .brand { display: flex; gap: 12px; align-items: center; padding: 10px; border-radius: 14px; }
+        .brand-mark { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; background: var(--page-action); color: var(--page-action-text); }
+        .brand-mark svg, .nav-item svg, .nav-note svg, .action-pill svg, .prompt-card svg, .trend-head svg { width: 18px; height: 18px; stroke-width: 2; }
+        .brand strong { display: block; font-size: 17px; letter-spacing: -0.02em; }
+        .brand small, .eyebrow, .section-label, .content-kicker { color: var(--page-text-muted); font-size: 12px; letter-spacing: .08em; text-transform: none; }
+        .primary-nav { margin-top: 22px; display: grid; gap: 6px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border-radius: 12px; color: var(--page-text-muted); transition: background .18s ease, color .18s ease, transform .18s ease; }
+        .nav-item:hover, .nav-item:focus-visible, .nav-item.active { background: var(--page-surface-soft); color: var(--page-text); outline: none; }
+        .nav-item.active { box-shadow: inset 3px 0 0 var(--page-action); }
+        .nav-note { margin-top: auto; display: grid; gap: 10px; padding: 14px; border-radius: 14px; background: var(--page-surface-soft); color: var(--page-text-muted); font-size: 13px; line-height: 1.6; }
+
+        .topbar h1 { margin: 4px 0 0; font-size: clamp(26px, 3vw, 40px); letter-spacing: -0.04em; }
+        .search-box { min-width: 0; display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 10px 10px 10px 14px; border: 1px solid var(--page-line); border-radius: 999px; background: var(--page-bg); transition: border-color .18s ease, box-shadow .18s ease, background .18s ease; }
+        .search-box:focus-within { border-color: var(--page-action); box-shadow: 0 0 0 4px color-mix(in srgb, var(--page-action) 14%, transparent); background: var(--page-surface); }
+        .search-box svg { width: 18px; height: 18px; color: var(--page-text-muted); }
+        .search-box input { min-width: 0; border: 0; outline: 0; background: transparent; color: var(--page-text); }
+        .search-box button, .prompt-card button { border: 0; border-radius: 999px; padding: 9px 14px; background: var(--page-action); color: var(--page-action-text); cursor: pointer; transition: transform .18s ease, box-shadow .18s ease, background .18s ease; }
+
+        .hero-copy { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+        .hero-copy h2 { margin: 10px 0 14px; max-width: 760px; font-size: clamp(34px, 5vw, 68px); line-height: .98; letter-spacing: -0.06em; }
+        .hero-copy p { margin: 0; max-width: 680px; color: var(--page-text-muted); font-size: 17px; line-height: 1.8; }
+        .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+        .action-pill { display: inline-flex; align-items: center; gap: 9px; padding: 12px 16px; border: 1px solid var(--page-line); border-radius: 999px; color: var(--page-text); background: var(--page-surface); transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, background .18s ease; white-space: nowrap; }
+        .action-pill.primary { background: var(--page-action); color: var(--page-action-text); border-color: var(--page-action); }
+        .hero-visual { position: relative; margin: 0; min-height: 360px; border-radius: 24px; overflow: hidden; background: var(--page-surface-soft); }
+        .hero-visual img { width: 100%; height: 100%; min-height: 360px; object-fit: cover; filter: saturate(.92); }
+        .hero-visual figcaption { position: absolute; left: 16px; right: 16px; bottom: 16px; padding: 12px 14px; border: 1px solid color-mix(in srgb, var(--page-surface) 60%, transparent); border-radius: 16px; background: color-mix(in srgb, var(--page-surface) 82%, transparent); color: var(--page-text); backdrop-filter: blur(18px); }
+
+        .opinion-card { padding: 22px; }
+        .section-heading { margin-bottom: 16px; }
+        .section-heading h2 { margin: 5px 0 0; font-size: clamp(24px, 3vw, 34px); letter-spacing: -0.04em; }
+        .section-heading.split { display: flex; align-items: end; justify-content: space-between; gap: 16px; }
+        .section-heading.compact h2 { font-size: 24px; }
+        .opinion-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+        .opinion-grid article, .prompt-card, .trend-card, .update-card, .featured-card { border: 1px solid var(--page-line); border-radius: 18px; background: var(--page-surface); }
+        .opinion-grid article { padding: 16px; min-width: 0; background: linear-gradient(180deg, var(--page-surface), color-mix(in srgb, var(--page-surface-soft) 62%, var(--page-surface))); }
+        .opinion-grid span { color: var(--page-action); font-weight: 700; }
+        .opinion-grid h3, .prompt-card h3, .update-card h3, .trend-card h3, .featured-card h3 { margin: 8px 0 8px; letter-spacing: -0.03em; }
+        .opinion-grid p, .prompt-card p, .update-card p, .trend-card p, .featured-card p { margin: 0; color: var(--page-text-muted); line-height: 1.65; }
+
+        .preview-main, .trend-panel { min-width: 0; display: grid; gap: 14px; }
+        .tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+        .tab { padding: 8px 12px; border-radius: 999px; color: var(--page-text-muted); background: var(--page-bg); transition: background .18s ease, color .18s ease; white-space: nowrap; }
+        .tab:hover, .tab:focus-visible, .tab.active { background: var(--page-action); color: var(--page-action-text); outline: none; }
+        .featured-card { display: grid; grid-template-columns: minmax(240px, .55fr) minmax(0, 1fr); gap: 16px; padding: 14px; align-items: center; }
+        .featured-card img { width: 100%; height: 260px; object-fit: cover; border-radius: 14px; }
+        .featured-card h3 { font-size: clamp(24px, 3vw, 36px); }
+        .meta-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; color: var(--page-text-muted); }
+        .meta-row span { padding: 7px 10px; border-radius: 999px; background: var(--page-surface-soft); }
+
+        .prompt-panel { padding: 18px; border-radius: 20px; background: var(--page-bg); border: 1px solid var(--page-line); }
+        .prompt-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+        .prompt-card { padding: 16px; display: grid; gap: 10px; align-content: start; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+        .prompt-card svg { color: var(--page-action); }
+        .prompt-card button { justify-self: start; margin-top: 4px; background: var(--page-surface-soft); color: var(--page-action); }
+        .prompt-card button:hover, .prompt-card button:focus-visible { background: var(--page-action); color: var(--page-action-text); outline: none; }
+        .story-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+        .update-card { overflow: hidden; display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 14px; padding: 12px; }
+        .update-card img { width: 150px; height: 150px; object-fit: cover; border-radius: 14px; background: var(--page-surface-soft); }
+        .update-card a { display: inline-flex; margin-top: 12px; color: var(--page-action); font-weight: 700; }
+
+        .trend-card { padding: 16px; background: color-mix(in srgb, var(--page-surface) 90%, var(--page-surface-soft)); }
+        .trend-head { display: flex; justify-content: space-between; align-items: center; }
+        .trend-list { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 12px; }
+        .trend-list li { display: grid; gap: 3px; padding: 12px; border-radius: 14px; background: var(--page-surface); border: 1px solid var(--page-line); }
+        .trend-list span, .trend-list small { color: var(--page-text-muted); }
+        .trend-list strong { font-size: 15px; }
+        .trend-card.subtle { background: var(--page-action); color: var(--page-action-text); border-color: var(--page-action); }
+        .trend-card.subtle p { color: color-mix(in srgb, var(--page-action-text) 78%, transparent); }
+
+        [data-dom-id] { transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, background .18s ease, color .18s ease; }
+        [data-dom-id]:hover { transform: translateY(-1px); box-shadow: 0 12px 28px color-mix(in srgb, var(--page-action) 16%, transparent); }
+        [data-dom-id]:focus-visible { outline: none; box-shadow: 0 0 0 4px color-mix(in srgb, var(--page-action) 18%, transparent); border-color: var(--page-action); }
+        .prompt-card:hover, .update-card:hover, .featured-card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--page-action) 40%, var(--page-line)); box-shadow: var(--page-shadow); }
+
+        @media (max-width: 1180px) {
+            .opinion-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .story-grid, .prompt-grid { grid-template-columns: 1fr; }
+            .update-card { grid-template-columns: 132px minmax(0, 1fr); }
+            .update-card img { width: 132px; height: 132px; }
+        }
+
+        @media (max-width: 720px) {
+            .topbar, .hero-card, .opinion-card, .preview-layout { padding: 14px; }
+            .section-heading.split { display: grid; align-items: start; }
+            .featured-card, .update-card { grid-template-columns: 1fr; }
+            .featured-card img, .update-card img { width: 100%; height: 220px; }
+            .hero-visual, .hero-visual img { min-height: 260px; }
+            .opinion-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { transition-duration: .01ms !important; scroll-behavior: auto !important; }
+        }
+    </style>
+
+    <script>
+        lucide.createIcons();
+        document.querySelectorAll('a[href="#"], button[type="submit"]').forEach(function (element) {
+            element.addEventListener('click', function (event) {
+                event.preventDefault();
+            });
+        });
+        var copyButton = document.querySelector('[data-dom-id="copy-prompt"]');
+        if (copyButton) {
+            copyButton.addEventListener('click', function () {
+                copyButton.textContent = '已复制摘要 Prompt';
+                window.setTimeout(function () {
+                    copyButton.textContent = '复制摘要 Prompt';
+                }, 1600);
+            });
+        }
+    </script>
+</body>
+</html>
